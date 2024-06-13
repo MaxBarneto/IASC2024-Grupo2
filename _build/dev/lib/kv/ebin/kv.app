@@ -1,6 +1,6 @@
 {application,kv,
              [{optional_applications,[]},
-              {applications,[kernel,stdlib,elixir,logger]},
+              {applications,[kernel,stdlib,elixir,logger,libcluster,horde]},
               {description,"kv"},
               {modules,['Elixir.KV']},
               {registered,[]},

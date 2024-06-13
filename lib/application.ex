@@ -1,4 +1,5 @@
 defmodule KV do
+  use Application
   @moduledoc """
   Documentation for `KV`.
   """
