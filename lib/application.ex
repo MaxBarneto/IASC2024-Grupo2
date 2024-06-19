@@ -1,19 +1,20 @@
-defmodule KV do
+defmodule KV.Application do
   use Application
-  @moduledoc """
-  Documentation for `KV`.
-  """
 
-  @doc """
-  Hello world.
+  def start(_start_type, _start_args) do
+    IO.puts("Arranca")
 
-  ## Examples
+    children = []
+    opts = [strategy:, :one_for_one]
 
-      iex> KV.hello()
-      :world
-
-  """
-  def hello do
-    :world
+    Supervisor.start_link(children,opts)
   end
+
+  defp topologies do
+    [
+      horde_minimal_example: [
+        strategy: Cluster.Strategy.Gossip
+      ]
+    ]
+
 end
