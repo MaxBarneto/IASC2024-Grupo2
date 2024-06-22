@@ -2,19 +2,28 @@ defmodule KV.Application do
   use Application
 
   def start(_start_type, _start_args) do
-    IO.puts("Arranca")
+    #children = [
+     # {Cluster.Supervisor, [topologies(), [name: KV.ClusterSupervisor]]}, #libcluster
+      #KV.HordeRegistry, # horde registry
+      #{Dato.DynamicSupervisor, [strategy: :one_for_one, distribution_strategy: Horde.UniformQuorumDistribution, process_redistribution: :active]},
+      #KV.NodeObserver.Supervisor # custom node supervisor
+    #]
 
-    children = []
-    opts = [strategy:, :one_for_one]
+    children = [
+      {Cluster.Supervisor, [topologies(), [name: KV.ClusterSupervisor]]}, #libcluster
+      %{id: Dato.DynamicSupervisor, start: {Dato.DynamicSupervisor, :start_link, [[]]} },
+    ]
 
-    Supervisor.start_link(children,opts)
+    opts = [strategy: :one_for_one, name: KV.SuperSupervisor, max_seconds: 5, max_restarts: 3]
+
+    Supervisor.start_link(children, opts)
   end
 
   defp topologies do
     [
-      horde_minimal_example: [
+      libcluster_strategy: [
         strategy: Cluster.Strategy.Gossip
       ]
     ]
-
+  end
 end
