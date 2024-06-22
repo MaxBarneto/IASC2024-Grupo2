@@ -1,4 +1,4 @@
-defmodule DatosSupervisor do
+defmodule DatosSupervisor do # Solo se hizo un copy paste
     use Supervisor
 
     def start_link(init) do
