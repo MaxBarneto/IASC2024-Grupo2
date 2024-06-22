@@ -2,27 +2,31 @@ defmodule DatoAgent do
   use Agent
   require Logger
 
-  def start do
-    Agent.start(fn -> %{} end)
-    end
-
-    def start_link do
-    Agent.start_link(fn -> %{} end)
+  def start(initial_state) do
+    Agent.start(fn -> initial_state end, name: __MODULE__)
   end
 
-  def init(state) do
-    {:ok, state}
+  def start_link(initial_state) do
+    Agent.start_link(fn -> initial_state end, name: __MODULE__)
+  end
+
+  def init(initial_state) do
+    {:ok, initial_state}
+  end
+
+  def getAll() do
+    Agent.get(DatoAgent, fn state -> state end)
   end
 
   def get(key) do
     Agent.get(DatoAgent, &Map.get(&1, key))
   end
 
-  def push(key, value) do
+  def insert(key, value) do
     Agent.update(DatoAgent, &Map.put(&1, key, value))
   end
 
-  def pop(key) do
+  def delete(key) do
     Agent.update(DatoAgent, &Map.delete(&1, key))
   end
 end

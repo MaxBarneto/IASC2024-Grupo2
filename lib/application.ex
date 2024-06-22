@@ -11,6 +11,7 @@ defmodule KV.Application do
 
     children = [
       #{Cluster.Supervisor, [topologies(), [name: KV.ClusterSupervisor]]}, #libcluster
+      %{id: DatoAgent, start: {DatoAgent, :start_link, [%{}]}, restart: :permanent},
       %{id: Dato.DynamicSupervisor, start: {Dato.DynamicSupervisor, :start_link, [[]]} },
     ]
 

@@ -11,7 +11,7 @@ defmodule Dato do
   end
 
   def init(intial_state) do
-    #intial_state = Dato.Agent.fecth_status(name)
+    intial_state = DatoAgent.getAll()
     {:ok, intial_state}
   end
 
@@ -20,19 +20,18 @@ defmodule Dato do
   end
 
   def handle_call({:get, key}, _from_pid, state) do
-    #dato = DatoAgent.get(key)
-    {:reply, state, state}
+    dato = DatoAgent.get(key)
+    {:reply, dato, state}
   end
 
   def handle_cast({:insert, key, value}, state) do
-    #DatoAgent.push(key, value)
-    #{:noreply, value}
+    DatoAgent.insert(key, value)
     {:noreply, {key, value}}
   end
 
   def handle_cast({:delete, key}, state) do
-    #DatoAgent.pop(key)
-    {:noreply, {}}
+    DatoAgent.delete(key)
+    {:noreply, state}
   end
 
   def get(name_or_pid, key) do
@@ -50,4 +49,8 @@ end
 
 # {:ok, pid_1} = Dato.DynamicSupervisor.start_child(Nodo1, [])
 # Dato.insert(pid_1, :pepe, "pepa")
+# Dato.insert(pid_1, :tp, "1C2024")
 # Dato.get(pid_1, :pepe)
+# Dato.get(pid_1, :tp)
+# Dato.delete(pid_1, :tp)
+# Dato.get(pid_1, :tp)
