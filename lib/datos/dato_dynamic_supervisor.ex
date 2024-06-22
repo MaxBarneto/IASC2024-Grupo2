@@ -10,7 +10,7 @@ defmodule Dato.DynamicSupervisor do
   end
 
   def start_child(child_name, state) do
-    spec = {Dato, {child_name, state} }
+    spec = {Dato, {child_name, state}}
     DynamicSupervisor.start_child(__MODULE__, spec)
   end
 end

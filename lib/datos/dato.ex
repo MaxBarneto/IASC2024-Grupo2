@@ -19,27 +19,28 @@ defmodule Dato do
     %{id: name, start: {__MODULE__, :start_link, [state, name]}, type: :worker, restart: :permanent}
   end
 
-  def handle_call(:get, pid, key) do
-    dato = DatoAgent.get(key)
-    {:reply, dato}
+  def handle_call({:get, key}, _from_pid, state) do
+    #dato = DatoAgent.get(key)
+    {:reply, state, state}
   end
 
-  def handle_call(:insert, {key, value}, state) do
+  def handle_cast({:insert, key, value}, state) do
     #DatoAgent.push(key, value)
-    {:noreply, state}
+    #{:noreply, value}
+    {:noreply, {key, value}}
   end
 
-  def handle_cast(:delete, pid, key) do
-    DatoAgent.pop(key)
-    {:noreply}
+  def handle_cast({:delete, key}, state) do
+    #DatoAgent.pop(key)
+    {:noreply, {}}
   end
 
   def get(name_or_pid, key) do
-    GenServer.call(name_or_pid, key, :get)
+    GenServer.call(name_or_pid, {:get, key})
   end
 
   def insert(name_or_pid, key, value) do
-    GenServer.call(name_or_pid, {key, value}, :insert)
+    GenServer.cast(name_or_pid, {:insert, key, value})
   end
 
   def delete(name_or_pid, key) do
@@ -49,3 +50,4 @@ end
 
 # {:ok, pid_1} = Dato.DynamicSupervisor.start_child(Nodo1, [])
 # Dato.insert(pid_1, :pepe, "pepa")
+# Dato.get(pid_1, :pepe)
