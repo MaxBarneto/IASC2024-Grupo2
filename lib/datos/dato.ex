@@ -46,11 +46,3 @@ defmodule Dato do
     GenServer.cast(name_or_pid, {:delete, key})
   end
 end
-
-# {:ok, pid_1} = Dato.DynamicSupervisor.start_child(Nodo1, [])
-# Dato.insert(pid_1, :pepe, "pepa")
-# Dato.insert(pid_1, :tp, "1C2024")
-# Dato.get(pid_1, :pepe)
-# Dato.get(pid_1, :tp)
-# Dato.delete(pid_1, :tp)
-# Dato.get(pid_1, :tp)

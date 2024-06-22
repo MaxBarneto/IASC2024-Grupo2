@@ -1,4 +1,4 @@
-defmodule Datos.Registry do
+defmodule DatoRegistry do # Solo se hizo un copy paste
   use Horde.Registry
   require Logger
 

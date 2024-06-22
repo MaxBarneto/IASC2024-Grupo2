@@ -1,4 +1,4 @@
-defmodule Datos.Supervisor do
+defmodule DatosSupervisor do
     use Supervisor
 
     def start_link(init) do
@@ -7,8 +7,8 @@ defmodule Datos.Supervisor do
     
       def init(_init_arg) do
         children = [
-          Orquestador.Registry,
-          Orquestador.DynamicSupervisor
+          DatoRegistry,
+          DatoDynamicSupervisor
         ]
   
         opts = [strategy: :one_for_one]

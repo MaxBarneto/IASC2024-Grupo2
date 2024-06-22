@@ -1,4 +1,4 @@
-defmodule Dato.DynamicSupervisor do
+defmodule DatoDynamicSupervisor do
   use DynamicSupervisor
 
   def start_link(init_arg) do
@@ -14,3 +14,12 @@ defmodule Dato.DynamicSupervisor do
     DynamicSupervisor.start_child(__MODULE__, spec)
   end
 end
+
+# Examples
+# {:ok, pid_1} = Dato.DynamicSupervisor.start_child(Nodo1, [])
+# Dato.insert(pid_1, :pepe, "pepa")
+# Dato.insert(pid_1, :tp, "1C2024")
+# Dato.get(pid_1, :pepe)
+# Dato.get(pid_1, :tp)
+# Dato.delete(pid_1, :tp)
+# Dato.get(pid_1, :tp)

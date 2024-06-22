@@ -12,7 +12,7 @@ defmodule KV.Application do
     children = [
       #{Cluster.Supervisor, [topologies(), [name: KV.ClusterSupervisor]]}, #libcluster
       %{id: DatoAgent, start: {DatoAgent, :start_link, [%{}]}, restart: :permanent},
-      %{id: Dato.DynamicSupervisor, start: {Dato.DynamicSupervisor, :start_link, [[]]} },
+      %{id: DatoDynamicSupervisor, start: {DatoDynamicSupervisor, :start_link, [[]]} },
     ]
 
     opts = [strategy: :one_for_one, name: KV.SuperSupervisor, max_seconds: 5, max_restarts: 3]
