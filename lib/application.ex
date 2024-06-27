@@ -13,6 +13,7 @@ defmodule KV.Application do
       #{Cluster.Supervisor, [topologies(), [name: KV.ClusterSupervisor]]}, #libcluster
       %{id: DatoAgent, start: {DatoAgent, :start_link, [%{}]}, restart: :permanent},
       %{id: DatoDynamicSupervisor, start: {DatoDynamicSupervisor, :start_link, [[]]} },
+      %{id: OrquestadorDynamicSupervisor, start: {OrquestadorDynamicSupervisor, :start_link, [[]]} }
     ]
 
     opts = [strategy: :one_for_one, name: KV.SuperSupervisor, max_seconds: 5, max_restarts: 3]
