@@ -2,17 +2,17 @@ defmodule Dato do
   use GenServer
   require Logger
 
-  def start(intial_state, name) do
-    GenServer.start(__MODULE__, intial_state, name: name)
+  def start(initial_state, name) do
+    GenServer.start(__MODULE__, initial_state, name: name)
   end
 
-  def start_link(intial_state, name) do
-    GenServer.start_link(__MODULE__, intial_state, name: name)
+  def start_link(initial_state, name) do
+    GenServer.start_link(__MODULE__, initial_state, name: name)
   end
 
-  def init(intial_state) do
-    intial_state = DatoAgent.getAll()
-    {:ok, intial_state}
+  def init(initial_state) do
+    initial_state = DatoAgent.getAll()
+    {:ok, initial_state}
   end
 
   def child_spec({name, state}) do
