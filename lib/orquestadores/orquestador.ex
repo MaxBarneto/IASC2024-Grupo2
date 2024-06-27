@@ -12,7 +12,7 @@ defmodule Orquestador do
 
     def child_spec(name) do
         %{id: name,
-          start: {__MODULE__, :start_link, name},
+          start: {__MODULE__, :start_link, [name]},
           type: :worker,
           restart: :permanent
         }

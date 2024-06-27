@@ -10,7 +10,7 @@ defmodule OrquestadorDynamicSupervisor do
   end
 
   def start_child(child_name) do
-    spec = {Orquestador, {child_name}}
+    spec = {Orquestador, child_name}
     DynamicSupervisor.start_child(__MODULE__, spec)
   end
   
