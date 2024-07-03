@@ -12,14 +12,18 @@ defmodule KV.Application do
 
     topologies = [
         libcluster_strategy: [
-          strategy: Cluster.Strategy.Gossip
+          strategy: Cluster.Strategy.Gossip,
+          config: [hosts: [:"a@127.0.0.1", :"b@127.0.0.1"]],
         ]
       ]
 
     children = [
       {Cluster.Supervisor, [topologies, [name: KV.ClusterSupervisor]]}, #libcluster
-      %{id: DatoAgent, start: {DatoAgent, :start_link, [%{}]}, restart: :permanent},
-      %{id: DatoDynamicSupervisor, start: {DatoDynamicSupervisor, :start_link, [[]]} },
+      
+      ##Supervisors##
+      Datos.Supervisor,
+
+
       %{id: OrquestadorDynamicSupervisor, start: {OrquestadorDynamicSupervisor, :start_link, [[]]} }
     ]
 

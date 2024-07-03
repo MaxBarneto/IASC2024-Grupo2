@@ -1,4 +1,4 @@
-defmodule DatosSupervisor do # Solo se hizo un copy paste
+defmodule Datos.Supervisor do # Solo se hizo un copy paste
     use Supervisor
 
     def start_link(init) do
@@ -7,8 +7,8 @@ defmodule DatosSupervisor do # Solo se hizo un copy paste
     
       def init(_init_arg) do
         children = [
-          DatoRegistry,
-          DatoDynamicSupervisor
+          Datos.Registry,
+          Datos.DynamicSupervisor
         ]
   
         opts = [strategy: :one_for_one]
