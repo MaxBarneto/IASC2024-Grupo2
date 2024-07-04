@@ -20,10 +20,9 @@ defmodule Datos.DynamicSupervisor do
     Enum.map(Node.list([:this, :visible]), &{__MODULE__, &1})
   end
 
-  def start_child(child_name, state) do
-    spec = {Dato, {child_name, state}}
+  def start_child({child_name, info, max_capacity}) do
+    spec = {Dato, {child_name, {info, max_capacity}}}
     Horde.DynamicSupervisor.start_child(__MODULE__, spec)
-    {:ok, child_name}
   end
 end
 
