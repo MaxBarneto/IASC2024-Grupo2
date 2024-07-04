@@ -1,4 +1,4 @@
-defmodule Datos.Registry do # Solo se hizo un copy paste
+defmodule Datos.Registry do
   use Horde.Registry
   require Logger
 
@@ -24,8 +24,10 @@ defmodule Datos.Registry do # Solo se hizo un copy paste
   end
 
   def start_link(_init) do
-      Horde.Registry.start_link(__MODULE__, [keys: :unique], name: __MODULE__)
+    Horde.Registry.start_link(__MODULE__, [keys: :unique], name: __MODULE__)
   end
 
-
+  def find(node_name) do
+    Horde.Registry.lookup(__MODULE__, node_name)
+  end
 end

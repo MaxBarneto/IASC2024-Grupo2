@@ -13,5 +13,4 @@ defmodule OrquestadorDynamicSupervisor do
     spec = {Orquestador, child_name}
     DynamicSupervisor.start_child(__MODULE__, spec)
   end
-  
 end
