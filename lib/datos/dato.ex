@@ -53,9 +53,4 @@ defmodule Dato do
   def delete(name_or_pid, key) do
     GenServer.cast(name_or_pid, {:delete, key})
   end
-
-  ## Pruebas
-  def handle_call(:prop, _from, {name, state}) do
-    {:reply}
-  end
 end
