@@ -2,38 +2,39 @@ defmodule Dato do
   use GenServer
   require Logger
 
-  def start(name, data) do
-    GenServer.start(__MODULE__, {name,data}, name: name)
-  end
+  @registry Datos.Registry
 
   def start_link(name, data) do
-    GenServer.start_link(__MODULE__, {name,data}, name: name)
-  end
+    GenServer.start_link(__MODULE__, data, name: via_tuple(name))
+  end 
 
   def child_spec({name, data}) do
-    %{id: name, start: {__MODULE__, :start_link, [name, data]}, type: :worker, restart: :permanent}
-  end
-
-  def init({name,data}) do
-    {datos, capacidad} = data
-    dato_state = %DatoState{
-      name: name,
-      data: datos,
-      capacidad: capacidad
+    %{
+      id: name,
+      start: {__MODULE__, :start_link, [name, data]},
+      type: :worker,
+      restart: :permanent
     }
-    {:ok, {name,data}}
   end
 
-  ##Handles##
-
-  def handle_call({:get, key}, _from_pid, state) do
-    dato = DatoAgent.get(key)
-    {:reply, dato, state}
+  def via_tuple(name) do
+    {:via, Horde.Registry, {@registry, name}}
   end
 
-  def handle_cast({:insert, key, value}, state) do
-    DatoAgent.insert(key, value)
-    {:noreply, {key, value}}
+  def init(data) do
+    {:ok, data}
+  end
+
+  ## Handles##
+
+  def handle_call({:get, key}, _from_pid, data) do
+    valor = Map.get(data, key)
+    {:reply, valor, data}
+  end
+
+  def handle_cast({:insert, key, value}, data) do
+    new_state = Map.put(data, key, value)
+    {:noreply, new_state}
   end
 
   def handle_cast({:delete, key}, state) do
@@ -51,5 +52,10 @@ defmodule Dato do
 
   def delete(name_or_pid, key) do
     GenServer.cast(name_or_pid, {:delete, key})
+  end
+
+  ## Pruebas
+  def handle_call(:prop, _from, {name, state}) do
+    {:reply}
   end
 end
