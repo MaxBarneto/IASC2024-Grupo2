@@ -30,4 +30,8 @@ defmodule Datos.Registry do
   def find(node_name) do
     Horde.Registry.lookup(__MODULE__, node_name)
   end
+
+  def find_all_pids() do
+    Horde.Registry.select(__MODULE__,[{{:"$1", :"$2", :_}, [], [{{:"$1", :"$2"}}]}]) |> Enum.sort()
+  end
 end
