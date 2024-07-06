@@ -4,14 +4,14 @@ defmodule Dato do
 
   @registry Datos.Registry
 
-  def start_link(name, data) do
-    GenServer.start_link(__MODULE__, data, name: via_tuple(name))
+  def start_link(name, state) do
+    GenServer.start_link(__MODULE__, state, name: via_tuple(name))
   end 
 
-  def child_spec({name, data}) do
+  def child_spec({name, state}) do
     %{
       id: name,
-      start: {__MODULE__, :start_link, [name, data]},
+      start: {__MODULE__, :start_link, [name, state]},
       type: :worker,
       restart: :permanent
     }
@@ -21,19 +21,18 @@ defmodule Dato do
     {:via, Horde.Registry, {@registry, name}}
   end
 
-  def init(data) do
-    {:ok, data}
+  def init(state) do
+    {:ok, state}
   end
 
   ## Handles##
 
   def handle_call({:get, key}, _from_pid, data) do
-    valor = Map.get(data, key)
-    {:reply, valor, data}
+    {:reply, DatoAgent.get(key) , data}
   end
 
   def handle_cast({:insert, key, value}, data) do
-    new_state = Map.put(data, key, value)
+    DatoAgent.insert(key, value)
     {:noreply, new_state}
   end
 
