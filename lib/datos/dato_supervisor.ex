@@ -1,4 +1,3 @@
-# Solo se hizo un copy paste
 defmodule Datos.Supervisor do
   use Supervisor
 
