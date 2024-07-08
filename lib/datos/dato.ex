@@ -22,6 +22,7 @@ defmodule Dato do
   end
 
   def init(initial_state) do
+    initial_state = DatoAgent.getAll()
     {:ok, initial_state}
   end
 
