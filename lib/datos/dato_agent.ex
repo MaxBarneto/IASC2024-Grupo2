@@ -1,6 +1,9 @@
 defmodule DatoAgent do
   use Agent
   require Logger
+  
+  @registry DatoRegistry
+
 
   def start(initial_state) do
     Agent.start(fn -> initial_state end, name: __MODULE__)
@@ -8,6 +11,16 @@ defmodule DatoAgent do
 
   def start_link(initial_state) do
     Agent.start_link(fn -> initial_state end, name: __MODULE__)
+    Registry.register(DatoRegistry, __MODULE__, self())
+  end
+
+  def child_spec(initial_state) do
+    %{
+      id: self(),
+      start: {__MODULE__, :start_link, [initial_state]},
+      type: :worker,
+      restart: :permanent
+    }
   end
 
   def init(initial_state) do
