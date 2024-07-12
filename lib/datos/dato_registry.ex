@@ -1,5 +1,4 @@
-defmodule Datos.Registry do
-  use Horde.Registry
+defmodule DatoRegistry do 
   require Logger
 
   def child_spec(opts) do
@@ -23,8 +22,26 @@ defmodule Datos.Registry do
     |> Enum.map(fn node -> {__MODULE__, node} end)
   end
 
-  def start_link(_init) do
-    Horde.Registry.start_link(__MODULE__, [keys: :unique], name: __MODULE__)
+  def child_spec(opts) do
+    %{
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, [opts]},
+      type: :worker,
+      restart: :permanent,
+      shutdown: 500
+    }
+  end
+
+  def start_link(_state) do
+    Registry.start_link(keys: :duplicate, name: __MODULE__)
+  end
+
+  def init(_state) do
+    # Logger.info("DatosRegistry init")
+  end
+
+  def find_all_pids() do
+    Registry.select(__MODULE__,[{{:"$1", :"$2", :_}, [], [{{:"$1", :"$2"}}]}]) |> Enum.sort()
   end
 
   def find(node_name) do

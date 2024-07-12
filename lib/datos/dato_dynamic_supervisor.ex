@@ -20,17 +20,17 @@ defmodule Datos.DynamicSupervisor do
     Enum.map(Node.list([:this, :visible]), &{__MODULE__, &1})
   end
 
-  def start_child(child_name, data) do
-    spec = {Dato, {child_name, data}}
-    Horde.DynamicSupervisor.start_child(__MODULE__, spec)
+  def start_child(initial_state) do
+    spec = {DatoAgent, initial_state}
+    DynamicSupervisor.start_child(__MODULE__, spec)
   end
 end
 
 # Examples
-# {:ok, pid} = Datos.DynamicSupervisor.start_child(Nodo1, [])
-# Dato.insert(pid, :pepe, "pepa")
-# Dato.insert(pid, :tp, "1C2024")
-# Dato.get(pid, :pepe)
-# Dato.get(pid, :tp)
-# Dato.delete(pid, :tp)
-# Dato.get(pid, :tp)
+# {:ok, pid_1} = DatoDynamicSupervisor.start_child(Nodo1, [])
+# Dato.insert(pid_1, :pepe, "pepa")
+# Dato.insert(pid_1, :tp, "1C2024")
+# Dato.get(pid_1, :pepe)
+# Dato.get(pid_1, :tp)
+# Dato.delete(pid_1, :tp)
+# Dato.get(pid_1, :tp)
