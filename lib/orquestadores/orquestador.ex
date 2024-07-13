@@ -2,32 +2,28 @@ defmodule Orquestador do
   use GenServer
   require Logger
 
-  def start(name) do
-    GenServer.start(__MODULE__, name: name)
-  end
-
-  def start_link(orchestrator_id) do
-    name = via_tuple(orchestrator_id)
-    GenServer.start_link(__MODULE__, orchestrator_id, name: name)
-  end
-
-  def child_spec(orchestrator_id) do
+  def child_spec({orchestrator_id, type}) do
     %{id: get_process_name(orchestrator_id),
-      start: {__MODULE__, :start_link, [orchestrator_id]},
+      start: {__MODULE__, :start_link, [orchestrator_id, type]},
       type: :worker,
       restart: :permanent
     }
   end
 
-  def init(orchestrator_id) do
-    Logger.info("Orchestrator created, identifier: #{orchestrator_id}")
-    #Horde.Registry.register(OrquestadorHordeRegistry, identifier, self())
-    {:ok, orchestrator_id}
+  def start_link(orchestrator_id, type) do
+    name = via_tuple({orchestrator_id, type})
+    GenServer.start_link(__MODULE__, {orchestrator_id, type}, name: name)
   end
 
-  defp via_tuple(orchestrator_id) do
+  def init({orchestrator_id, type}) do
+    Logger.info("Orchestrator created, identifier: #{orchestrator_id}")
+    #Horde.Registry.register(OrquestadorHordeRegistry, identifier, self())
+    {:ok, {orchestrator_id, type}}
+  end
+
+  defp via_tuple({orchestrator_id, type}) do
   #{:via, Horde.Registry, {OrquestadorHordeRegistry, orchestrator_id}}
-  {:via, Registry, {OrquestadorRegistry, orchestrator_id}}
+  {:via, Registry, {OrquestadorRegistry, orchestrator_id, type}}
   end
 
   defp get_process_name(orchestrator_id) do
@@ -48,11 +44,11 @@ defmodule Orquestador do
     DatoAgent.delete(key)
     {:noreply, state}
   end
-  
+
   def get(name_or_pid, key) do
     GenServer.call(name_or_pid, {:get, key})
   end
-  
+
   def insert(name_or_pid, key, value) do
     GenServer.cast(name_or_pid, {:insert, key, value})
   end
