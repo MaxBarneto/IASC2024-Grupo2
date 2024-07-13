@@ -20,7 +20,7 @@ defmodule DatoRegistry do
   end
 
   def find(name) do
-    Registry.lookup(__MODULE__, node_name)
+    Registry.lookup(__MODULE__, name)
   end
 
   def find_all_pids() do
