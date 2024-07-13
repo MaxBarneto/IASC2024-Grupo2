@@ -1,24 +1,14 @@
 defmodule Datos.DynamicSupervisor do
-  use Horde.DynamicSupervisor
+  use DynamicSupervisor
 
   def start_link(init_arg) do
-    Horde.DynamicSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
+    DynamicSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
   end
 
   def init(init_arg) do
-    [
-      members: members(),
-      strategy: :one_for_one,
-      distribution_strategy: Horde.UniformQuorumDistribution,
-      process_redistribution: :active
-    ]
-    |> Keyword.merge(init_arg)
-    |> Horde.DynamicSupervisor.init()
+    DynamicSupervisor.init(strategy: :one_for_one)
   end
 
-  defp members do
-    Enum.map(Node.list([:this, :visible]), &{__MODULE__, &1})
-  end
 
   def start_child(initial_state) do
     spec = {DatoAgent, initial_state}
