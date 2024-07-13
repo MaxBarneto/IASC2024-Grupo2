@@ -30,7 +30,7 @@ defmodule Orquestador do
     String.to_atom("Orq-#{orchestrator_id}")
   end
 
-  def handle_call({:get, key}, _from_pid, state) do
+  def handle_call({:find, key}, _from_pid, state) do
     dato = DatoAgent.get(key)
     {:reply, dato, state}
   end
@@ -45,8 +45,8 @@ defmodule Orquestador do
     {:noreply, state}
   end
 
-  def get(name_or_pid, key) do
-    GenServer.call(name_or_pid, {:get, key})
+  def find(name_or_pid, key) do
+    GenServer.call(name_or_pid, {:find, key})
   end
 
   def insert(name_or_pid, key, value) do
