@@ -5,17 +5,21 @@ defmodule DatoAgent do
   @registry DatoRegistry
 
 
-  def start(initial_state) do
-    Agent.start(fn -> initial_state end)
+  def start(initial_state, name) do
+    Agent.start(fn -> initial_state end, name: name)
   end
 
-  def start_link(initial_state) do
+  def start_link(initial_state, name) do
     Agent.start_link(fn -> initial_state end)
-    Registry.register(DatoRegistry, __MODULE__, self())
+    Registry.register(DatoRegistry, __MODULE__, name)
   end
 
   def init(initial_state) do
     {:ok, initial_state}
+  end
+
+  def child_spec({state, name}) do
+    %{id: name, start: {__MODULE__, :start_link, [state, name]}, type: :worker, restart: :permanent}
   end
 
   def getAll(pid) do

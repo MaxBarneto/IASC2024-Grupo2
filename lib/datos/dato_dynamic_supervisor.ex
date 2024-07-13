@@ -10,8 +10,8 @@ defmodule Datos.DynamicSupervisor do
   end
 
 
-  def start_child(initial_state) do
-    spec = {DatoAgent, initial_state}
+  def start_child(initial_state, name) do
+    spec = {DatoAgent, {initial_state, name}}
     DynamicSupervisor.start_child(__MODULE__, spec)
   end
 end
