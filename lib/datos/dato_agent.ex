@@ -10,8 +10,8 @@ defmodule DatoAgent do
   end
 
   def start_link(initial_state, name) do
-    Agent.start_link(fn -> initial_state end)
-    Registry.register(DatoRegistry, __MODULE__, name)
+    id = {:via, Registry, {DatoRegistry, name}}
+    {:ok, pid} = Agent.start_link(fn -> initial_state end, name: id)
   end
 
   def init(initial_state) do

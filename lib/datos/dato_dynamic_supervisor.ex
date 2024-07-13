@@ -17,7 +17,7 @@ defmodule Datos.DynamicSupervisor do
 end
 
 # Examples
-# {:ok, pid_1} = DatoDynamicSupervisor.start_child(Nodo1, [])
+# {:ok, pid1} = Datos.DynamicSupervisor.start_child(Map.new, :agent1)
 # Dato.insert(pid_1, :pepe, "pepa")
 # Dato.insert(pid_1, :tp, "1C2024")
 # Dato.get(pid_1, :pepe)
