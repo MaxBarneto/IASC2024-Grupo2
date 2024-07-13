@@ -6,40 +6,31 @@ defmodule DatoAgent do
 
 
   def start(initial_state) do
-    Agent.start(fn -> initial_state end, name: __MODULE__)
+    Agent.start(fn -> initial_state end)
   end
 
   def start_link(initial_state) do
-    Agent.start_link(fn -> initial_state end, name: __MODULE__)
+    Agent.start_link(fn -> initial_state end)
     Registry.register(DatoRegistry, __MODULE__, self())
-  end
-
-  def child_spec(initial_state) do
-    %{
-      id: self(),
-      start: {__MODULE__, :start_link, [initial_state]},
-      type: :worker,
-      restart: :permanent
-    }
   end
 
   def init(initial_state) do
     {:ok, initial_state}
   end
 
-  def getAll() do
-    Agent.get(DatoAgent, fn state -> state end)
+  def getAll(pid) do
+    Agent.get(pid, fn state -> state end)
   end
 
-  def get(key) do
-    Agent.get(DatoAgent, &Map.get(&1, key))
+  def get(pid, key) do
+    Agent.get(pid, fn(state) -> Map.get(state, key) end)
   end
 
-  def insert(key, value) do
-    Agent.update(DatoAgent, &Map.put(&1, key, value))
+  def insert(pid, key, value) do
+    Agent.update(pid, fn(state) -> Map.put(state, key, value) end)
   end
 
-  def delete(key) do
-    Agent.update(DatoAgent, &Map.delete(&1, key))
+  def delete(pid, key) do
+    Agent.update(pid, fn(state) -> Map.delete(state, key) end)
   end
 end

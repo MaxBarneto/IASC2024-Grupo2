@@ -8,7 +8,7 @@ defmodule Datos.Supervisor do
       def init(_init_arg) do
         children = [
           DatoRegistry,
-          DatoDynamicSupervisor,
+          Datos.DynamicSupervisor,
           {DatoAgent, Map.new()}
         ]
   

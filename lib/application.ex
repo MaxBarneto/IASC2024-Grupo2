@@ -14,7 +14,7 @@ defmodule KV.Application do
       {Cluster.Supervisor, [topologies, [name: KV.ClusterSupervisor]]}, #libcluster
       
       #Supervisores
-      DatosSupervisor,
+      Datos.Supervisor,
       
     ]
 
