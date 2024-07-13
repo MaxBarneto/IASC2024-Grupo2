@@ -11,16 +11,19 @@ defmodule KV.Application do
     #]
 
     topologies = [
-        libcluster_strategy: [
-          strategy: Cluster.Strategy.Gossip
-        ]
+      libcluster_strategy: [
+        strategy: Cluster.Strategy.Gossip
       ]
+    ]
 
     children = [
       {Cluster.Supervisor, [topologies, [name: KV.ClusterSupervisor]]}, #libcluster
+      #OrquestadorHordeRegistry, # horde registry
+      OrquestadorRegistry, # registry
       %{id: DatoAgent, start: {DatoAgent, :start_link, [%{}]}, restart: :permanent},
       %{id: DatoDynamicSupervisor, start: {DatoDynamicSupervisor, :start_link, [[]]} },
-      %{id: OrquestadorDynamicSupervisor, start: {OrquestadorDynamicSupervisor, :start_link, [[]]} }
+      #%{id: OrquestadorDynamicSupervisor, start: {OrquestadorDynamicSupervisor, :start_link, [[]]} },
+      {OrquestadorDynamicSupervisor, [strategy: :one_for_one, distribution_strategy: Horde.UniformDistribution, process_redistribution: :active]},
     ]
 
     opts = [strategy: :one_for_one, name: KV.SuperSupervisor, max_seconds: 5, max_restarts: 3]
