@@ -4,14 +4,9 @@ defmodule DatoAgent do
   
   @registry DatoRegistry
 
-
-  def start(initial_state, name) do
-    Agent.start(fn -> initial_state end, name: name)
-  end
-
-  def start_link(initial_state, name) do
-    id = {:via, Registry, {DatoRegistry, name}}
-    {:ok, pid} = Agent.start_link(fn -> initial_state end, name: id)
+  def start_link(initial_state, name, value) do
+    {:ok, pid} = Agent.start_link(fn -> initial_state end, 
+                                  name: {:via, Registry, {DatoRegistry, name, value}})
   end
 
   def init(initial_state) do
