@@ -15,7 +15,7 @@ defmodule KV.Application do
       
       #Supervisores
       Datos.Supervisor,
-      
+      %{id: OrquestadorDynamicSupervisor, start: {OrquestadorDynamicSupervisor, :start_link, [[]]} },
     ]
 
     opts = [strategy: :one_for_one, name: KV.SuperSupervisor, max_seconds: 5, max_restarts: 3]

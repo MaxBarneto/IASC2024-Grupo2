@@ -1,4 +1,4 @@
-defmodule OrquestadorSupervisor do 
+defmodule OrquestadoresSupervisor do # Solo se hizo un copy paste
     use Supervisor
 
     def start_link(init) do
@@ -7,7 +7,7 @@ defmodule OrquestadorSupervisor do
     
       def init(_init_arg) do
         children = [
-          {Orquestador,[]}
+          OrquestadorDynamicSupervisor
         ]
   
         opts = [strategy: :one_for_one]
