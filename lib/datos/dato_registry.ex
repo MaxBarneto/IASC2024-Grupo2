@@ -27,6 +27,10 @@ defmodule DatoRegistry do
     Registry.select(__MODULE__,[{{:"$1", :"$2", :"$3"}, [], [{{:"$1", :"$2",:"$3"}}]}]) |> Enum.sort()
   end
 
+  def find_all_pids() do
+    Registry.select(__MODULE__,[{{:_, :"$2", :_}, [], [:"$2"]}]) |> Enum.sort()
+  end
+
   def find_replicas_for(list, value) do
     replicas = Enum.filter(list, fn {x, _, _} -> String.contains?(x, "replica") end)
     result = Enum.filter(replicas, fn {_,_,y} -> (y == value) end)

@@ -16,7 +16,13 @@ defmodule NodeManager do
     def agent_list do
         list = DatoRegistry.find_all
         agents = DatoRegistry.find_agents(list)
-        Enum.map(lista, fn {_,x,_} -> x end)
+        Enum.map(agents, fn {_,x,_} -> x end)
+    end
+
+    def get_replicas_of(value) do
+        list = DatoRegistry.find_all
+        replicas = DatoRegistry.find_replicas_for(list,value)
+        Enum.map(replicas, fn {_,x,_} -> x end)
     end
 
 
