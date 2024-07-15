@@ -13,8 +13,8 @@ defmodule DatoAgent do
     {:ok, initial_state}
   end
 
-  def child_spec({state, name}) do
-    %{id: name, start: {__MODULE__, :start_link, [state, name]}, type: :worker, restart: :permanent}
+  def child_spec({state, name, value}) do
+    %{id: name, start: {__MODULE__, :start_link, [state, name, value]}, type: :worker, restart: :permanent}
   end
 
   def getAll(pid) do
@@ -31,5 +31,10 @@ defmodule DatoAgent do
 
   def delete(pid, key) do
     Agent.update(pid, fn(state) -> Map.delete(state, key) end)
+  end
+
+  def data_size(pid) do
+    data = DatoAgent.getAll(pid)
+    map_size(data)
   end
 end

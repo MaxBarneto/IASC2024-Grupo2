@@ -34,6 +34,7 @@ defmodule DatoRegistry do
 
   def find_agents(list) do
     agents = Enum.filter(list, fn {x, _, _} -> String.contains?(x, "agent") end)
+    Enum.map(agents, fn {_,x,_} -> x end)
   end
 
   #{"agent:1", pid, "1"}, {"replica:1", pid, "1"}, {"replica:2", pid, "1"}
