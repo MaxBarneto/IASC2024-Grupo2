@@ -31,14 +31,20 @@ defmodule DatoRegistry do
     Registry.select(__MODULE__,[{{:_, :"$2", :_}, [], [:"$2"]}]) |> Enum.sort()
   end
 
-  def find_replicas_for(list, value) do
+  def find_replicas_for(value) do
+    list = DatoRegistry.find_all
     replicas = Enum.filter(list, fn {x, _, _} -> String.contains?(x, "replica") end)
     result = Enum.filter(replicas, fn {_,_,y} -> (y == value) end)
   end
 
-  def find_agents(list) do
-    agents = Enum.filter(list, fn {x, _, _} -> String.contains?(x, "agent") end)
-    Enum.map(agents, fn {_,x,_} -> x end)
+  def find_agents() do
+    list = DatoRegistry.find_all
+    result = Enum.filter(list, fn {x, _, _} -> String.contains?(x, "agent") end)
+  end
+
+  def find_agent_by_pid(pid) do
+    list = DatoRegistry.find_all
+    result = Enum.filter(list, fn {x,y,z} -> (y == pid) end) |> List.first()
   end
 
   #{"agent:1", pid, "1"}, {"replica:1", pid, "1"}, {"replica:2", pid, "1"}
