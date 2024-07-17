@@ -13,8 +13,8 @@ defmodule Kv.MixProject do
 
   def application do
     [
-      extra_applications: [:logger],
-      mod: {Kv.Application, []}
+      extra_applications: [:logger, :wx, :observer , :eex, :runtime_tools],
+      mod: {KV.Application, []}
     ]
   end
 
