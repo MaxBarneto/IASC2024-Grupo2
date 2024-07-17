@@ -1,32 +1,40 @@
 defmodule DatoAgent do
   use Agent
   require Logger
+  
+  @registry DatoRegistry
 
-  def start(initial_state) do
-    Agent.start(fn -> initial_state end, name: __MODULE__)
+
+  def start(initial_state, name) do
+    Agent.start(fn -> initial_state end, name: name)
   end
 
-  def start_link(initial_state) do
-    Agent.start_link(fn -> initial_state end, name: __MODULE__)
+  def start_link(initial_state, name) do
+    id = {:via, Registry, {DatoRegistry, name}}
+    {:ok, pid} = Agent.start_link(fn -> initial_state end, name: id)
   end
 
   def init(initial_state) do
     {:ok, initial_state}
   end
 
-  def getAll() do
-    Agent.get(DatoAgent, fn state -> state end)
+  def child_spec({state, name}) do
+    %{id: name, start: {__MODULE__, :start_link, [state, name]}, type: :worker, restart: :permanent}
   end
 
-  def get(key) do
-    Agent.get(DatoAgent, &Map.get(&1, key))
+  def getAll(pid) do
+    Agent.get(pid, fn state -> state end)
   end
 
-  def insert(key, value) do
-    Agent.update(DatoAgent, &Map.put(&1, key, value))
+  def get(pid, key) do
+    Agent.get(pid, fn(state) -> Map.get(state, key) end)
   end
 
-  def delete(key) do
-    Agent.update(DatoAgent, &Map.delete(&1, key))
+  def insert(pid, key, value) do
+    Agent.update(pid, fn(state) -> Map.put(state, key, value) end)
+  end
+
+  def delete(pid, key) do
+    Agent.update(pid, fn(state) -> Map.delete(state, key) end)
   end
 end
