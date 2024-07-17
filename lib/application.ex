@@ -10,6 +10,13 @@ defmodule KV.Application do
       ]
     ]
 
+    topologies = [
+      libcluster_strategy: [
+        strategy: Cluster.Strategy.Gossip,
+        config: [hosts: [:"a@127.0.0.1", :"b@127.0.0.1"]]
+      ]
+    ]
+
     children = [
       {Cluster.Supervisor, [topologies, [name: KV.ClusterSupervisor]]}, #libcluster
       
@@ -23,4 +30,6 @@ defmodule KV.Application do
 
     Supervisor.start_link(children, opts)
   end
+end
+
 end

@@ -1,5 +1,7 @@
 defmodule Datos.Supervisor do
   use Supervisor
+defmodule Datos.Supervisor do
+  use Supervisor
 
     def start_link(init) do
         Supervisor.start_link(__MODULE__, init, name: __MODULE__)
@@ -16,3 +18,4 @@ defmodule Datos.Supervisor do
         Supervisor.init(children, opts)
       end
 end
+

@@ -1,4 +1,5 @@
 defmodule DatoRegistry do 
+defmodule DatoRegistry do 
   require Logger
 
   def child_spec(opts) do
