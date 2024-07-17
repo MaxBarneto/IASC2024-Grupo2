@@ -23,12 +23,8 @@ defmodule DatoAgent do
 
   def get(pid, key) do
     Agent.get(pid, fn(state) -> Map.get(state, key) end)
-  def get(pid, key) do
-    Agent.get(pid, fn(state) -> Map.get(state, key) end)
   end
 
-  def insert(pid, key, value) do
-    Agent.update(pid, fn(state) -> Map.put(state, key, value) end)
   def insert(pid, key, value) do
     Agent.update(pid, fn(state) -> Map.put(state, key, value) end)
   end
