@@ -1,4 +1,4 @@
-defmodule OrquestadoresSupervisor do # Solo se hizo un copy paste
+defmodule OrquestadorSupervisor do # Solo se hizo un copy paste
     use Supervisor
 
     def start_link(init) do
@@ -7,6 +7,7 @@ defmodule OrquestadoresSupervisor do # Solo se hizo un copy paste
     
       def init(_init_arg) do
         children = [
+          OrquestadorRegistry,
           OrquestadorDynamicSupervisor
         ]
   
