@@ -62,16 +62,19 @@ defmodule Orquestador do
     {:reply, state, state}
   end
 
-  def find(name_or_pid, key) do
-    GenServer.call(name_or_pid, {:find, key})
+  def find(identifier, key) do
+    GenServer.call(via_tuple(identifier), {:find, key})
   end
 
-  def insert(name_or_pid, key, value) do
-    GenServer.cast(name_or_pid, {:insert, key, value})
+  def insert(identifier, key, value) do
+    case is_master(identifier) do
+      true -> GenServer.cast(via_tuple(identifier), {:insert, key, value})
+      false -> {:error, "Solo el orquestador master puede insertar datos"}
+    end
   end
 
-  def delete(name_or_pid, key) do
-    GenServer.cast(name_or_pid, {:delete, key})
+  def delete(identifier, key) do
+    GenServer.cast(via_tuple(identifier), {:delete, key})
   end
 
   def whereis(identifier) do

@@ -16,7 +16,7 @@ defmodule KV.Application do
       #Supervisores
       Datos.Supervisor,
       NodeManager.Supervisor,
-      OrquestadorSupervisor
+      OrquestadorSupervisor,
       NodeObserver.Supervisor,
     ]
 

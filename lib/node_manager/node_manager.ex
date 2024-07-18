@@ -70,4 +70,21 @@ defmodule NodeManager do
     def sort_by_most_empty(list) do
         Enum.sort(list,&(DatoAgent.data_size(&1) <= DatoAgent.data_size(&2)))
     end
+
+    # Logica Orquestadores
+    def node_down(node_id) do
+        orquestadores =
+          OrquestadorHordeRegistry.get_all
+          |>Enum.filter(fn {_, _, node} -> node != node_id end)
+
+        if is_master_down(orquestadores) do
+          {id, _pid, node} = orquestadores |> List.first
+          Orquestador.set_as_master(id)
+          Logger.info("---- Nuevo nodo master: #{node}, #{id} ----")
+        end
+    end
+
+    def is_master_down(orquestadores) do
+        orquestadores |> Enum.all?(fn {id, _, _} -> !Orquestador.is_master(id) end)
+    end
 end
