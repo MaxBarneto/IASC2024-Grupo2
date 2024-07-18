@@ -6,31 +6,25 @@ defmodule Orquestador do
     %{id: get_process_name(orchestrator_id),
       start: {__MODULE__, :start_link, [orchestrator_id, type]},
       type: :worker,
-      shutdown: 1000,
+      shutdown: 500,
       restart: :permanent
     }
   end
 
   def start_link(orchestrator_id, type) do
-    name = via_tuple(orchestrator_id, type)
+    name = via_tuple(orchestrator_id)
     GenServer.start_link(__MODULE__, {orchestrator_id, type}, name: name)
   end
 
   def init({orchestrator_id, type}) do
     Process.flag(:trap_exit, true)
     Logger.info("Orchestrator created, identifier: #{orchestrator_id} - type: #{type}")
-    #Horde.Registry.register(OrquestadorHordeRegistry, identifier, self())
-    {:ok, {orchestrator_id, type}}
+    {:ok, type}
   end
 
   def terminate(_reason, _state) do
     Logger.info("Me mori")
-    #save_state(state) # save state to Redis, DeltaCRDT, Postgres, Mysql, etc.
-  end
-
-  defp via_tuple(orchestrator_id, type) do
-    #OrquestadorRegistry.via_tuple(orchestrator_id, type)
-    OrquestadorHordeRegistry.via_tuple(orchestrator_id, type)
+    #save_state(state)
   end
 
   defp via_tuple(orchestrator_id) do
@@ -49,7 +43,7 @@ defmodule Orquestador do
 
   def handle_cast({:insert, key, value}, state) do
     DatoAgent.insert(key, value)
-    {:noreply, {key, value}}
+    {:noreply, state}
   end
 
   def handle_cast({:delete, key}, state) do
@@ -57,19 +51,12 @@ defmodule Orquestador do
     {:noreply, state}
   end
 
-  def handle_call({:fake, message}, _from_pid, state) do
-    Logger.info("Recibido: #{message}")
-    {:reply, self(), state}
-  end
-
-  def handle_call({:update_state, type}, _from_pid, state) do
-    {id, _} = state
-    {:reply, type, {id, type}}
+  def handle_call({:update_state, type}, _from_pid, _state) do
+    {:reply, type, type}
   end
 
   def handle_call(:state, _from_pid, state) do
-    {_, type} = state
-    {:reply, type, state}
+    {:reply, state, state}
   end
 
   def find(name_or_pid, key) do
@@ -84,14 +71,10 @@ defmodule Orquestador do
     GenServer.cast(name_or_pid, {:delete, key})
   end
 
-  def send_message(identifier, message) do
-    GenServer.call(via_tuple(identifier), {:fake, message})
-  end
-
   def whereis(identifier) do
     identifier
     #|> OrquestadorRegistry.via_tuple
-    |> OrquestadorHordeRegistry.via_tuple
+    |> via_tuple
     |> GenServer.whereis()
   end
 

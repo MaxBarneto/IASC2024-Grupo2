@@ -12,18 +12,14 @@ defmodule OrquestadorHordeRegistry do
 		|> Horde.Registry.init()
 	end
 
-	def members() do
+	defp members() do
 		[Node.self() | Node.list()]
 		|> Enum.map(fn node -> {__MODULE__, node} end)
 		#Enum.map(Node.list([:this, :visible]), &{__MODULE__, &1})
 	end
 
-  def via_tuple(orchestrator_id, type) do
-    {:via, Horde.Registry, {__MODULE__, orchestrator_id, {type, node()}}}
-  end
-
   def via_tuple(orchestrator_id) do
-    {:via, Horde.Registry, {__MODULE__, orchestrator_id}}
+    {:via, Horde.Registry, {__MODULE__, orchestrator_id, node()}}
   end
 
   def find(orchestrator_id) do
