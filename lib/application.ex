@@ -2,7 +2,6 @@ defmodule KV.Application do
   use Application
 
   def start(_start_type, _start_args) do
-
     topologies = [
       libcluster_strategy: [
         strategy: Cluster.Strategy.Gossip,
@@ -12,7 +11,7 @@ defmodule KV.Application do
 
     children = [
       {Cluster.Supervisor, [topologies, [name: KV.ClusterSupervisor]]}, #libcluster
-      
+      {Plug.Cowboy, scheme: :http, plug: KVServer, options: [port: 3000]}
       #Supervisores
       Datos.Supervisor,
       NodeManager.Supervisor,

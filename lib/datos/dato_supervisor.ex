@@ -16,4 +16,3 @@ defmodule Datos.Supervisor do
         Supervisor.init(children, opts)
       end
 end
-

@@ -23,6 +23,7 @@ defmodule DatoRegistry do
     Registry.lookup(__MODULE__, name)
   end
 
+
   def find_all() do
     Registry.select(__MODULE__,[{{:"$1", :"$2", :"$3"}, [], [{{:"$1", :"$2",:"$3"}}]}]) |> Enum.sort()
   end

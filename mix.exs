@@ -1,17 +1,16 @@
-defmodule KV.MixProject do
+defmodule Kv.MixProject do
   use Mix.Project
 
   def project do
     [
       app: :kv,
       version: "0.1.0",
-      elixir: "~> 1.15",
+      elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
   end
 
-  # Run "mix help compile.app" to learn about applications.
   def application do
     [
       extra_applications: [:logger, :wx, :observer , :eex, :runtime_tools],
@@ -19,11 +18,15 @@ defmodule KV.MixProject do
     ]
   end
 
-  # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
       {:libcluster, "~> 3.3"},
-      {:horde, "~> 0.8.3"}
+      {:horde, "~> 0.8.3"},
+      {:plug_cowboy, "~> 2.5"}
     ]
   end
 end
+
+
+#elixir --name node1@127.0.0.1 -S mix
+#elixir --name node2@127.0.0.1 -S mix
