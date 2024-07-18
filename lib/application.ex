@@ -15,6 +15,7 @@ defmodule KV.Application do
       
       #Supervisores
       Datos.Supervisor,
+      NodeManager.Supervisor,
       #OrquestadorRegistry,
       OrquestadorHordeRegistry,
       %{id: OrquestadorDynamicSupervisor, start: {OrquestadorDynamicSupervisor, :start_link, [[]]} },

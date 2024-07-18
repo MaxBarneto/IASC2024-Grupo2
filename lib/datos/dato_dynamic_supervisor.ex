@@ -10,14 +10,15 @@ defmodule Datos.DynamicSupervisor do
   end
 
 
-  def start_child(initial_state, name) do
-    spec = {DatoAgent, {initial_state, name}}
+  def start_child(initial_state, name, value) do
+    spec = {DatoAgent, {initial_state, name, value}}
     DynamicSupervisor.start_child(__MODULE__, spec)
   end
 end
 
 # Examples
 # {:ok, pid1} = Datos.DynamicSupervisor.start_child(Map.new, :agent1)
+# {:ok, pid1} = Datos.DynamicSupervisor.start_child(Map.new, :agent1, 1)
 # Dato.insert(pid_1, :pepe, "pepa")
 # Dato.insert(pid_1, :tp, "1C2024")
 # Dato.get(pid_1, :pepe)
