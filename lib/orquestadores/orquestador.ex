@@ -6,6 +6,7 @@ defmodule Orquestador do
     %{id: get_process_name(orchestrator_id),
       start: {__MODULE__, :start_link, [orchestrator_id, type]},
       type: :worker,
+      shutdown: 1000,
       restart: :permanent
     }
   end
@@ -16,9 +17,15 @@ defmodule Orquestador do
   end
 
   def init({orchestrator_id, type}) do
+    Process.flag(:trap_exit, true)
     Logger.info("Orchestrator created, identifier: #{orchestrator_id} - type: #{type}")
     #Horde.Registry.register(OrquestadorHordeRegistry, identifier, self())
     {:ok, {orchestrator_id, type}}
+  end
+
+  def terminate(_reason, _state) do
+    Logger.info("Me mori")
+    #save_state(state) # save state to Redis, DeltaCRDT, Postgres, Mysql, etc.
   end
 
   defp via_tuple(orchestrator_id, type) do
@@ -55,6 +62,16 @@ defmodule Orquestador do
     {:reply, self(), state}
   end
 
+  def handle_call({:update_state, type}, _from_pid, state) do
+    {id, _} = state
+    {:reply, type, {id, type}}
+  end
+
+  def handle_call(:state, _from_pid, state) do
+    {_, type} = state
+    {:reply, type, state}
+  end
+
   def find(name_or_pid, key) do
     GenServer.call(name_or_pid, {:find, key})
   end
@@ -76,5 +93,17 @@ defmodule Orquestador do
     #|> OrquestadorRegistry.via_tuple
     |> OrquestadorHordeRegistry.via_tuple
     |> GenServer.whereis()
+  end
+
+  def set_as_master(identifier) do
+    GenServer.call(via_tuple(identifier), {:update_state, :master})
+  end
+
+  def whoami(identifier) do
+    GenServer.call(via_tuple(identifier), :state)
+  end
+
+  def is_master(identifier) do
+    GenServer.call(via_tuple(identifier), :state) == :master
   end
 end

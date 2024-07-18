@@ -18,3 +18,4 @@ end
 # Examples
 # OrquestadorDynamicSupervisor.start_child(:o1, :master)
 # OrquestadorDynamicSupervisor.start_child(:o2, :slave)
+# OrquestadorDynamicSupervisor.start_child(:o3, :slave)

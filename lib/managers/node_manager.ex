@@ -8,15 +8,17 @@ defmodule NodeManager do
 
   def node_down(node_id) do
     orquestadores =
-    #[{_,_,{type,node}}] = 
       OrquestadorHordeRegistry.get_all |>
       Enum.filter(fn {_,_,{_,node}} -> node != node_id end)
 
-    if orquestadores |> Enum.all?(fn {_,_,{type,node}} -> type != :master end) do
-    #if type == :master do
-      Logger.info("---- Node master caido ----")
-      #OrquestadorHordeRegistry.get_all |>
-      #Enum.filter(fn {_,_,{_,node}} -> node == node_id end)
+    if is_master_down(orquestadores) do
+      {id, _, {_, node}} = orquestadores |> List.first
+      Orquestador.set_as_master(id)
+      Logger.info("---- Nuevo nodo master: #{node}, #{id} ----")
     end
+  end
+
+  def is_master_down(orquestadores) do
+    orquestadores |> Enum.all?(fn {id,_,{_,_}} -> !Orquestador.is_master(id) end)
   end
 end
