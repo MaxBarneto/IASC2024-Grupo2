@@ -2,6 +2,9 @@ defmodule Orquestador do
   use GenServer
   require Logger
 
+  @master :master
+  @slave :slave
+
   def child_spec({orchestrator_id, type}) do
     %{id: get_process_name(orchestrator_id),
       start: {__MODULE__, :start_link, [orchestrator_id, type]},
@@ -73,13 +76,12 @@ defmodule Orquestador do
 
   def whereis(identifier) do
     identifier
-    #|> OrquestadorRegistry.via_tuple
     |> via_tuple
     |> GenServer.whereis()
   end
 
   def set_as_master(identifier) do
-    GenServer.call(via_tuple(identifier), {:update_state, :master})
+    GenServer.call(via_tuple(identifier), {:update_state, @master})
   end
 
   def whoami(identifier) do
@@ -87,6 +89,6 @@ defmodule Orquestador do
   end
 
   def is_master(identifier) do
-    GenServer.call(via_tuple(identifier), :state) == :master
+    GenServer.call(via_tuple(identifier), :state) == @master
   end
 end

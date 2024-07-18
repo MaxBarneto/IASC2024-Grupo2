@@ -12,8 +12,8 @@ defmodule NodeManager do
 
   def node_down(node_id) do
     orquestadores =
-      OrquestadorHordeRegistry.get_all |>
-      Enum.filter(fn {_, _, node} -> node != node_id end)
+      OrquestadorHordeRegistry.get_all
+      |>Enum.filter(fn {_, _, node} -> node != node_id end)
 
     if is_master_down(orquestadores) do
       {id, _pid, node} = orquestadores |> List.first
