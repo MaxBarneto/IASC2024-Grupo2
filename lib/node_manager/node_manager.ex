@@ -1,5 +1,6 @@
 defmodule NodeManager do
     use GenServer
+    require Logger
 
     @max_capacity 5
 
@@ -12,7 +13,6 @@ defmodule NodeManager do
     end
 
     def handle_call({:insert, key, value}, _from_pid, state) do
-
         agents = Enum.filter(agent_list(), fn x -> DatoAgent.data_size(x) < @max_capacity end)
 
         if Enum.empty?(get_value(key)) do
@@ -26,7 +26,6 @@ defmodule NodeManager do
                 Enum.map(replicas, fn replica_pid -> DatoAgent.insert(replica_pid, key,value) end)
             end    
         end
- 
 
         {:reply, "dato insertado", state}
     end
@@ -51,12 +50,10 @@ defmodule NodeManager do
         values = Enum.map(agent_list(), fn agent_pid -> DatoAgent.get(agent_pid, key) end)
         Enum.filter(values, fn x -> not is_nil(x) end)
     end
-        
 
     def agent_list do
         agents = DatoRegistry.find_agents()
         agent_pids = Enum.map(agents, fn {_,x,_} -> x end)
-        
     end
 
     def next_agent(list) do
@@ -74,10 +71,20 @@ defmodule NodeManager do
         Enum.sort(list,&(DatoAgent.data_size(&1) <= DatoAgent.data_size(&2)))
     end
 
+    # Logica Orquestadores
+    def node_down(node_id) do
+        orquestadores =
+          OrquestadorHordeRegistry.get_all
+          |>Enum.filter(fn {_, _, node} -> node != node_id end)
 
+        if is_master_down(orquestadores) do
+          {id, _pid, node} = orquestadores |> List.first
+          Orquestador.set_as_master(id)
+          Logger.info("---- Nuevo nodo master: #{node}, #{id} ----")
+        end
+    end
 
-
-
-
-
+    def is_master_down(orquestadores) do
+        orquestadores |> Enum.all?(fn {id, _, _} -> !Orquestador.is_master(id) end)
+    end
 end

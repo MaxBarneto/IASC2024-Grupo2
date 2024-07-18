@@ -21,4 +21,16 @@ defmodule OrquestadorRegistry do
   def get_orchestrator(identifier) do
     Registry.lookup(__MODULE__, identifier)
   end
+
+  def via_tuple(orchestrator_id, type) do
+    {:via, Registry, {__MODULE__, orchestrator_id, type}}
+  end
+
+  def via_tuple(orchestrator_id) do
+    {:via, Registry, {__MODULE__, orchestrator_id}}
+  end
+
+  def get_all do
+    Registry.select(__MODULE__,[{{:"$1", :"$2", :"$3"}, [], [{{:"$1", :"$2", :"$3"}}]}]) |> Enum.sort()
+  end
 end

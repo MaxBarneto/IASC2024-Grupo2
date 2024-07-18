@@ -2,28 +2,37 @@ defmodule Orquestador do
   use GenServer
   require Logger
 
+  @master :master
+  @slave :slave
+
   def child_spec({orchestrator_id, type}) do
     %{id: get_process_name(orchestrator_id),
       start: {__MODULE__, :start_link, [orchestrator_id, type]},
       type: :worker,
+      shutdown: 500,
       restart: :permanent
     }
   end
 
   def start_link(orchestrator_id, type) do
-    name = via_tuple({orchestrator_id, type})
+    name = via_tuple(orchestrator_id)
     GenServer.start_link(__MODULE__, {orchestrator_id, type}, name: name)
   end
 
   def init({orchestrator_id, type}) do
-    Logger.info("Orchestrator created, identifier: #{orchestrator_id}")
-    #Horde.Registry.register(OrquestadorHordeRegistry, identifier, self())
-    {:ok, {orchestrator_id, type}}
+    Process.flag(:trap_exit, true)
+    Logger.info("Orchestrator created, identifier: #{orchestrator_id} - type: #{type}")
+    {:ok, type}
   end
 
-  defp via_tuple({orchestrator_id, type}) do
-  #{:via, Horde.Registry, {OrquestadorHordeRegistry, orchestrator_id}}
-  {:via, Registry, {OrquestadorRegistry, orchestrator_id, type}}
+  def terminate(_reason, _state) do
+    Logger.info("Me mori")
+    #save_state(state)
+  end
+
+  defp via_tuple(orchestrator_id) do
+    #OrquestadorRegistry.via_tuple(orchestrator_id, type)
+    OrquestadorHordeRegistry.via_tuple(orchestrator_id)
   end
 
   defp get_process_name(orchestrator_id) do
@@ -37,7 +46,7 @@ defmodule Orquestador do
 
   def handle_cast({:insert, key, value}, state) do
     DatoAgent.insert(key, value)
-    {:noreply, {key, value}}
+    {:noreply, state}
   end
 
   def handle_cast({:delete, key}, state) do
@@ -45,15 +54,44 @@ defmodule Orquestador do
     {:noreply, state}
   end
 
-  def find(name_or_pid, key) do
-    GenServer.call(name_or_pid, {:find, key})
+  def handle_call({:update_state, type}, _from_pid, _state) do
+    {:reply, type, type}
   end
 
-  def insert(name_or_pid, key, value) do
-    GenServer.cast(name_or_pid, {:insert, key, value})
+  def handle_call(:state, _from_pid, state) do
+    {:reply, state, state}
   end
 
-  def delete(name_or_pid, key) do
-    GenServer.cast(name_or_pid, {:delete, key})
+  def find(identifier, key) do
+    GenServer.call(via_tuple(identifier), {:find, key})
+  end
+
+  def insert(identifier, key, value) do
+    case is_master(identifier) do
+      true -> GenServer.cast(via_tuple(identifier), {:insert, key, value})
+      false -> {:error, "Solo el orquestador master puede insertar datos"}
+    end
+  end
+
+  def delete(identifier, key) do
+    GenServer.cast(via_tuple(identifier), {:delete, key})
+  end
+
+  def whereis(identifier) do
+    identifier
+    |> via_tuple
+    |> GenServer.whereis()
+  end
+
+  def set_as_master(identifier) do
+    GenServer.call(via_tuple(identifier), {:update_state, @master})
+  end
+
+  def whoami(identifier) do
+    GenServer.call(via_tuple(identifier), :state)
+  end
+
+  def is_master(identifier) do
+    GenServer.call(via_tuple(identifier), :state) == @master
   end
 end
