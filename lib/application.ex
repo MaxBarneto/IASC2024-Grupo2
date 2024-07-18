@@ -11,9 +11,11 @@ defmodule KV.Application do
 
     children = [
       {Cluster.Supervisor, [topologies, [name: KV.ClusterSupervisor]]}, #libcluster
-      Datos.Supervisor,
-      %{id: OrquestadorDynamicSupervisor, start: {OrquestadorDynamicSupervisor, :start_link, [[]]}},
       {Plug.Cowboy, scheme: :http, plug: KVServer, options: [port: 3000]}
+      #Supervisores
+      Datos.Supervisor,
+      NodeManager.Supervisor,
+      %{id: OrquestadorDynamicSupervisor, start: {OrquestadorDynamicSupervisor, :start_link, [[]]} },
     ]
 
     opts = [strategy: :one_for_one, name: KV.SuperSupervisor, max_seconds: 5, max_restarts: 3]

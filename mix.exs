@@ -20,8 +20,8 @@ defmodule Kv.MixProject do
 
   defp deps do
     [
-      {:horde, "~> 0.8.3"},
       {:libcluster, "~> 3.3"},
+      {:horde, "~> 0.8.3"},
       {:plug_cowboy, "~> 2.5"}
     ]
   end

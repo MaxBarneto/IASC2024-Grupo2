@@ -9,7 +9,6 @@ defmodule Datos.Supervisor do
         children = [
           DatoRegistry,
           Datos.DynamicSupervisor,
-
         ]
   
         opts = [strategy: :one_for_one]
