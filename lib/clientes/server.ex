@@ -32,7 +32,7 @@ defmodule KVServer do
 
     IO.puts("Insertando clave: #{key} y valor: #{value}")
 
-    #Orquestador.insert(key, value)
+    Orquestador.insert(key, value)
 
     send_resp(conn, 201, "Created")
   end
