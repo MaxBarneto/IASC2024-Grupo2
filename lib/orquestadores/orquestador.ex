@@ -45,8 +45,8 @@ defmodule Orquestador do
   end
 
   def handle_call({:insert, key, value}, _from_pid, state) do
-    NodeManager.insert(key, value)
-    {:reply, :ok, state}
+    result = NodeManager.insert(key, value)
+    {:reply, result, state}
   end
 
   def handle_cast({:delete, key}, state) do

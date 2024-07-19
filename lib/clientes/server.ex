@@ -32,9 +32,10 @@ defmodule KVServer do
 
     IO.puts("Insertando clave: #{key} y valor: #{value}")
 
-    Orquestador.insert(key, value)
-
-    send_resp(conn, 201, "Created")
+    case Orquestador.insert(key, value) do
+      :ok -> send_resp(conn, 201, "Created")
+      :error -> send_resp(conn, 409, "Stack overflow")
+    end
   end
 
   match _ do
