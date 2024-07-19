@@ -5,18 +5,12 @@ defmodule KVServer do
   plug :dispatch
 
   get "/datos/:key" do
-    IO.puts("Recibe un get con la clave: #{key}")
+    IO.puts("Buscando dato para clave: #{key}")
 
-    # case DatoAgent.get(DatoRegistry, key) do
-    #   {:ok, value} ->
-    #     send_resp(conn, 200, value)
-    #   :error ->
-    #     send_resp(conn, 404, "Not Found")
-    # end
-
-    value = Orquestador.find(key)
-
-    send_resp(conn, 200, value)
+    case Orquestador.find(key) do
+      {:ok, value} -> send_resp(conn, 200, value)
+      {:not_found, reason} -> send_resp(conn, 404, "Not Found. Message: #{reason}")
+    end
   end
 
   post "/datos/:key" do

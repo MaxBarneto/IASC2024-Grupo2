@@ -24,7 +24,7 @@ defmodule NodeManager do
     
             if not Enum.empty?(replicas) do
                 Enum.map(replicas, fn replica_pid -> DatoAgent.insert(replica_pid, key,value) end)
-            end    
+            end
         end
 
         {:reply, "dato insertado", state}

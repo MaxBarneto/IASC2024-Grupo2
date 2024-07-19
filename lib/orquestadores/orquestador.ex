@@ -68,7 +68,10 @@ defmodule Orquestador do
 
   def find(key) do
     {orq_id, _, _} = OrquestadorHordeRegistry.get_any
-    GenServer.call(via_tuple(orq_id), {:find, key})
+    case GenServer.call(via_tuple(orq_id), {:find, key}) do
+      [dato] -> {:ok, dato}
+      [] -> {:not_found, "No existe la clave"}
+    end
   end
 
   def insert(identifier, key, value) do
