@@ -29,4 +29,8 @@ defmodule OrquestadorHordeRegistry do
   def get_all do
     Horde.Registry.select(__MODULE__, [{{:"$1", :"$2", :"$3"}, [], [{{:"$1", :"$2", :"$3"}}]}])
   end
+
+	def get_any do
+    get_all() |> Enum.random
+  end
 end

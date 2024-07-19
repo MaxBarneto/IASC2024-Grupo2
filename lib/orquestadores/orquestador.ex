@@ -40,7 +40,7 @@ defmodule Orquestador do
   end
 
   def handle_call({:find, key}, _from_pid, state) do
-    dato = DatoAgent.get(key)
+    dato = NodeManager.get_value(key)
     {:reply, dato, state}
   end
 
@@ -64,6 +64,11 @@ defmodule Orquestador do
 
   def find(identifier, key) do
     GenServer.call(via_tuple(identifier), {:find, key})
+  end
+
+  def find(key) do
+    {orq_id, _, _} = OrquestadorHordeRegistry.get_any
+    GenServer.call(via_tuple(orq_id), {:find, key})
   end
 
   def insert(identifier, key, value) do

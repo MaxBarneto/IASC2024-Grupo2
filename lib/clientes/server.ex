@@ -4,7 +4,7 @@ defmodule KVServer do
   plug :match
   plug :dispatch
 
-  get "/:key" do
+  get "/datos/:key" do
     IO.puts("Recibe un get con la clave: #{key}")
 
     # case DatoAgent.get(DatoRegistry, key) do
@@ -14,10 +14,12 @@ defmodule KVServer do
     #     send_resp(conn, 404, "Not Found")
     # end
 
-    send_resp(conn, 200, "fixed_value")
+    value = Orquestador.find(key)
+
+    send_resp(conn, 200, value)
   end
 
-  post "/:key" do
+  post "/datos/:key" do
     {:ok, body, _conn} = Plug.Conn.read_body(conn)
     IO.puts("Recibe un get con la clave: #{key} y valor: #{body}")
     #DatoAgent.insert(DatoRegistry, key, body)
