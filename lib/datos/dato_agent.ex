@@ -6,14 +6,12 @@ defmodule DatoAgent do
 
 
   def start_link(initial_state, name, value) do
-    {:ok, pid} = Agent.start_link(fn -> initial_state end, 
-                                  name: {:via, Registry, {DatoRegistry, name, value}})
+    {:ok, pid} = Agent.start_link(fn -> initial_state end, name: {:via, Registry, {DatoRegistry, name, value}})
   end
 
   def init(initial_state) do
     {:ok, initial_state}
   end
-
 
   def child_spec({state, name, value}) do
     %{id: name, start: {__MODULE__, :start_link, [state, name, value]}, type: :worker, restart: :permanent}

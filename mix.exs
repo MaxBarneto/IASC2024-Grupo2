@@ -22,11 +22,8 @@ defmodule Kv.MixProject do
     [
       {:libcluster, "~> 3.3"},
       {:horde, "~> 0.8.3"},
-      {:plug_cowboy, "~> 2.5"}
+      {:plug_cowboy, "~> 2.6"},
+      {:jason, "~> 1.3"},
     ]
   end
 end
-
-
-#elixir --name node1@127.0.0.1 -S mix
-#elixir --name node2@127.0.0.1 -S mix

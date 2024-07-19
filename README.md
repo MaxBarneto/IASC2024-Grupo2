@@ -30,5 +30,5 @@ pid = Process.whereis(NodeManager)
 # hacer calls al node manager
 GenServer.call(pid del nodemanager, {:comando, valores})
 
-ejemplo:  GenServer.call(pid,{:insert,:a,"a"})
+ejemplo:  GenServer.call(pid,{:insert,"a","a"})
 

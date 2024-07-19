@@ -15,19 +15,22 @@ defmodule NodeManager do
     def handle_call({:insert, key, value}, _from_pid, state) do
         agents = Enum.filter(agent_list(), fn x -> DatoAgent.data_size(x) < @max_capacity end)
 
-        if Enum.empty?(get_value(key)) do
-            agent_pid = next_agent(agents)
-            agent_tuple = DatoRegistry.find_agent_by_pid(agent_pid)
-            agent_number = elem(agent_tuple,2)
-            replicas = get_replicas_of(agent_number)
-            DatoAgent.insert(agent_pid, key,value)
-    
-            if not Enum.empty?(replicas) do
-                Enum.map(replicas, fn replica_pid -> DatoAgent.insert(replica_pid, key,value) end)
-            end    
+        if Enum.empty?(agents) do
+            {:reply, :error, state}
+        else
+            if Enum.empty?(get_value(key)) do
+                agent_pid = next_agent(agents)
+                agent_tuple = DatoRegistry.find_agent_by_pid(agent_pid)
+                agent_number = elem(agent_tuple,2)
+                replicas = get_replicas_of(agent_number)
+                DatoAgent.insert(agent_pid, key,value)
+        
+                if not Enum.empty?(replicas) do
+                    Enum.map(replicas, fn replica_pid -> DatoAgent.insert(replica_pid, key,value) end)
+                end
+            end
+            {:reply, :ok, state}
         end
-
-        {:reply, "dato insertado", state}
     end
 
     def handle_call({:delete, key}, _from_pid, state) do
@@ -49,6 +52,11 @@ defmodule NodeManager do
     def get_value(key) do
         values = Enum.map(agent_list(), fn agent_pid -> DatoAgent.get(agent_pid, key) end)
         Enum.filter(values, fn x -> not is_nil(x) end)
+    end
+
+    def insert(key, value) do
+        pid = Process.whereis(NodeManager)
+        GenServer.call(pid, {:insert, key, value})
     end
 
     def agent_list do
