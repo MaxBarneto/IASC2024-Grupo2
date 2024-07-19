@@ -51,6 +51,11 @@ defmodule NodeManager do
         Enum.filter(values, fn x -> not is_nil(x) end)
     end
 
+    def insert(key, value) do
+        pid = Process.whereis(NodeManager)
+        GenServer.call(pid, {:insert, key, value})
+    end
+
     def agent_list do
         agents = DatoRegistry.find_agents()
         agent_pids = Enum.map(agents, fn {_,x,_} -> x end)

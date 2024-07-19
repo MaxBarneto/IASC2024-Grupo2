@@ -44,9 +44,9 @@ defmodule Orquestador do
     {:reply, dato, state}
   end
 
-  def handle_cast({:insert, key, value}, state) do
-    DatoAgent.insert(key, value)
-    {:noreply, state}
+  def handle_call({:insert, key, value}, _from_pid, state) do
+    NodeManager.insert(key, value)
+    {:reply, :ok, state}
   end
 
   def handle_cast({:delete, key}, state) do
@@ -71,18 +71,18 @@ defmodule Orquestador do
     GenServer.call(via_tuple(orq_id), {:find, key})
   end
 
-  def insert(identifier, key, value) do
-    case is_master(identifier) do
-      true -> GenServer.cast(via_tuple(identifier), {:insert, key, value})
-      false -> {:error, "Solo el orquestador master puede insertar datos"}
-    end
-  end
+  # def insert(identifier, key, value) do
+  #   case is_master(identifier) do
+  #     true -> GenServer.cast(via_tuple(identifier), {:insert, key, value})
+  #     false -> {:error, "Solo el orquestador master puede insertar datos"}
+  #   end
+  # end
 
   def insert(key, value) do
-    {orq_id, _, _} = OrquestadorHordeRegistry.get_any
+    {orq_id, pid, _} = OrquestadorHordeRegistry.get_any
     case is_master(orq_id) do
-      true -> GenServer.cast(via_tuple(orq_id), {:insert, key, value})
-      false -> {:error, "Solo el orquestador master puede insertar datos"}
+      true -> GenServer.call(via_tuple(orq_id), {:insert, key, value})
+      false -> {:error, "Solo el orquestador master puede insertar datos"} # TODO: redirigir al master
     end
   end
 
