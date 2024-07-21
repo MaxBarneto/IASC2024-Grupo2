@@ -91,6 +91,10 @@ defmodule NodeManager do
         Enum.filter(agent_nodes, fn node -> (:erpc.call(node,DatoRegistry,:find_all_data,[]) |> map_size()) == lowest_size end)
     end
 
+    def sort_by_most_empty(list) do
+        Enum.sort(list,&(DatoAgent.data_size(&1) <= DatoAgent.data_size(&2)))
+    end
+
     # Logica Orquestadores
     def node_down(node_id) do
         orquestadores =
