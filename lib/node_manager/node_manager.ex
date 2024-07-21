@@ -60,10 +60,8 @@ defmodule NodeManager do
     end
 
     def agent_list do
-        agents = Enum.map([Node.self() | Node.list()],
-                            fn node -> :erpc.call(node,DatoRegistry,:find_agents,[]) end)
-                            |> List.flatten
-        Enum.map(agents, fn {_,x,_} -> x end)
+        agents = DatoRegistry.find_agents()
+        agent_pids = Enum.map(agents, fn {_,x,_} -> x end)
     end
     
     def agent_node_list do
