@@ -30,10 +30,11 @@ defmodule DatoAgent do
     Agent.get(pid, fn(state) -> Map.get(state, key) end)
   end
 
-  def insert(pid, key, value) do
+  def insert(key, value) do
+    pid = DatoRegistry.find_all_pids |> List.first
     Agent.update(pid, fn(state) -> Map.put(state, key, value) end)
   end
-
+  
   def delete(pid, key) do
     Agent.update(pid, fn(state) -> Map.delete(state, key) end)
     value = DatoRegistry.find_agent_by_pid(pid) |> elem(2)

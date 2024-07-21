@@ -54,6 +54,8 @@ defmodule DatoRegistry do
     List.foldl(data_list,%{},fn x,acc -> Map.merge(acc,x) end) 
   end
 
+  
+
   #{"agent:1", pid, "1"}, {"replica:1", pid, "1"}, {"replica:2", pid, "1"}
   #result = Enum.filter(list, fn {x, _, _} -> String.contains?(x, "replica") end)
 end
