@@ -48,6 +48,12 @@ defmodule DatoRegistry do
     result = Enum.filter(list, fn {x,y,z} -> (y == pid) end) |> List.first()
   end
 
+  def find_all_data do
+    pids = find_all_pids()
+    data_list = Enum.map(pids, fn pid -> DatoAgent.getAll(pid) end)
+    List.foldl(data_list,%{},fn x,acc -> Map.merge(acc,x) end) 
+  end
+
   #{"agent:1", pid, "1"}, {"replica:1", pid, "1"}, {"replica:2", pid, "1"}
   #result = Enum.filter(list, fn {x, _, _} -> String.contains?(x, "replica") end)
 end

@@ -60,8 +60,17 @@ defmodule NodeManager do
     end
 
     def agent_list do
-        agents = DatoRegistry.find_agents()
-        agent_pids = Enum.map(agents, fn {_,x,_} -> x end)
+        agents = Enum.map([Node.self() | Node.list()],
+                            fn node -> :erpc.call(node,DatoRegistry,:find_agents,[]) end)
+                            |> List.flatten
+        Enum.map(agents, fn {_,x,_} -> x end)
+    end
+    
+    def agent_node_list do
+        agent_nodes = Enum.filter([Node.self() | Node.list()], 
+                                    fn node -> 
+                                        not Enum.empty?(:erpc.call(node,DatoRegistry,:find_agents,[]))  
+                                    end)
     end
 
     def next_agent(list) do
@@ -75,8 +84,11 @@ defmodule NodeManager do
         Enum.map(replicas, fn {_,x,_} -> x end)
     end
 
-    def sort_by_most_empty(list) do
-        Enum.sort(list,&(DatoAgent.data_size(&1) <= DatoAgent.data_size(&2)))
+    def emptiest_data_node() do
+        agent_nodes = agent_node_list()
+        data_list = Enum.map(agent_nodes, fn node -> :erpc.call(node,DatoRegistry,:find_all_data,[]) end)
+        lowest_size = Enum.map(data_list,fn x -> map_size(x) end) |> List.first
+        Enum.filter(agent_nodes, fn node -> (:erpc.call(node,DatoRegistry,:find_all_data,[]) |> map_size()) == lowest_size end)
     end
 
     # Logica Orquestadores
@@ -93,6 +105,12 @@ defmodule NodeManager do
     end
 
     def is_master_down(orquestadores) do
-        orquestadores |> Enum.all?(fn {id, _, _} -> !Orquestador.is_master(id) end)
+        orquestadores |> Enums.all?(fn {id, _, _} -> !Orquestador.is_master(id) end)
     end
+    
+    #eprc call
+    #:erpc.call(node,DatoRegistry,:find_all_pids,[]) 
+    #:erpc.call(Node.list,DatoAgent,:insert,[remote agent pid,:a,"a"])
+    #multi call genserver
+    #GenServer.multi_call([node() | Node.list()],NodeManager, {:insert,:a,"a"})
 end
