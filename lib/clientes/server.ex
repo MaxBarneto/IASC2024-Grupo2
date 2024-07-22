@@ -29,7 +29,7 @@ defmodule KVServer do
     #filter = Map.get(query_params, "filter", "default")
 
     IO.puts("Buscando dato para valores mayores que: #{value}")
-    IO.puts(value)
+    
     result = Orquestador.find_by_value(value)
     send_resp(conn, 200, Jason.encode!(result))
   end
