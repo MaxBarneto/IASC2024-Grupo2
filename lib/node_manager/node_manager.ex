@@ -2,7 +2,7 @@ defmodule NodeManager do
     use GenServer
     require Logger
 
-    @max_capacity 5
+    @max_capacity 2
 
     def start_link(_init_arg) do
         GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
@@ -14,16 +14,19 @@ defmodule NodeManager do
 
     def handle_call({:insert, key, value}, _from_pid, state) do
         data_node = emptiest_data_node()
-        
-        agent = :erpc.call(data_node,DatoRegistry,:find_agents,[]) |> List.first
-        agent_value = elem(agent,2)
-        replicas = Enum.filter([Node.self()|Node.list()], fn node -> String.contains?(to_string(node),agent_value) end)
-        :erpc.call(data_node, DatoAgent, :insert, [key,value])
-         if not Enum.empty?(replicas) do
-            Enum.map(replicas,fn replica -> :erpc.call(replica,DatoAgent,:insert,[key,value]) end)
-         end
-        {:reply,:ok,state}
-        
+        if map_size(:erpc.call(data_node, DatoAgent,:getAll,[])) >= @max_capacity
+        do
+            Logger.info("base de datos llena")
+        else
+            agent = :erpc.call(data_node,DatoRegistry,:find_agents,[]) |> List.first
+            agent_value = elem(agent,2)
+            replicas = Enum.filter([Node.self()|Node.list()], fn node -> String.contains?(to_string(node),agent_value) end)
+            :erpc.call(data_node, DatoAgent, :insert, [key,value])
+             if not Enum.empty?(replicas) do
+                Enum.map(replicas,fn replica -> :erpc.call(replica,DatoAgent,:insert,[key,value]) end)
+             end
+        end
+        {:reply,:ok,state}   
     end
 
     def handle_call({:delete, key}, _from_pid, state) do
