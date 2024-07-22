@@ -1,16 +1,22 @@
 defmodule KV.Application do
   use Application
 
-  def start(_start_type, _start_args) do
+  def start(_start_type, _args) do
     # Asegúrate de iniciar el generador de números aleatorios
     :rand.seed(:exsplus, :os.timestamp())
 
+    port_env = System.get_env("PORT")
+    port = case port_env do
+      nil -> 5000 + :rand.uniform(1001) - 1
+      _ -> String.to_integer(port_env)
+    end
+
     # Genera un número aleatorio entre 5000 y 6000
-    numero_aleatorio = 5000 + :rand.uniform(1001) - 1
     numero_aleatorio_cluster = 5000 + :rand.uniform(1001) - 1
 
-    IO.puts("Número aleatorio para Plug.Cowboy entre 5000 y 6000: #{numero_aleatorio}")
+    IO.puts("Puerto para el server #{port}")
     IO.puts("Número aleatorio para libcluster entre 5000 y 6000: #{numero_aleatorio_cluster}")
+
 
     topologies = [
       libcluster_strategy: [
@@ -24,7 +30,7 @@ defmodule KV.Application do
 
     children = [
       {Cluster.Supervisor, [topologies, [name: KV.ClusterSupervisor]]}, #libcluster
-      {Plug.Cowboy, scheme: :http, plug: KVServer, options: [port: numero_aleatorio]},
+      {Plug.Cowboy, scheme: :http, plug: KVServer, options: [port: port]},
       #Supervisores
       Datos.Supervisor,
       NodeManager.Supervisor,
