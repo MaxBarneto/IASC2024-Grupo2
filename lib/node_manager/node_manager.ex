@@ -44,8 +44,7 @@ defmodule NodeManager do
     end
 
     def handle_call({:get_all}, _from_pid, state) do
-        dato_List = Enum.map(agent_list(), fn x ->  DatoAgent.getAll(x) end)
-        datos = List.foldl(dato_List,%{}, fn x, acc -> Map.merge(acc, x) end)
+        datos = get_all_data()
         {:reply, datos,state}
     end
 
@@ -57,6 +56,11 @@ defmodule NodeManager do
     def insert(key, value) do
         pid = Process.whereis(NodeManager)
         GenServer.call(pid, {:insert, key, value})
+    end
+
+    def get_values_greater_than(value) do
+        datos = get_all_data()
+        Enum.map(Enum.filter(datos, fn {_, v} -> v > value end), fn {_, v} -> v end)
     end
 
     def agent_list do
@@ -94,5 +98,10 @@ defmodule NodeManager do
 
     def is_master_down(orquestadores) do
         orquestadores |> Enum.all?(fn {id, _, _} -> !Orquestador.is_master(id) end)
+    end
+
+    def get_all_data() do
+        dato_List = Enum.map(agent_list(), fn x ->  DatoAgent.getAll(x) end)
+        List.foldl(dato_List,%{}, fn x, acc -> Map.merge(acc, x) end)
     end
 end

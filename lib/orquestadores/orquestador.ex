@@ -62,6 +62,11 @@ defmodule Orquestador do
     {:reply, state, state}
   end
 
+  def handle_call({:find_by_value, value}, _from_pid, state) do
+    datos = NodeManager.get_values_greater_than(value)
+    {:reply, datos, state}
+  end
+
   def find(identifier, key) do
     GenServer.call(via_tuple(identifier), {:find, key})
   end
@@ -88,6 +93,11 @@ defmodule Orquestador do
 
   def delete(identifier, key) do
     GenServer.cast(via_tuple(identifier), {:delete, key})
+  end
+
+  def find_by_value(value) do
+    {orq_id, _, _} = OrquestadorHordeRegistry.get_any
+    GenServer.call(via_tuple(orq_id), {:find_by_value, value})
   end
 
   def whereis(identifier) do
