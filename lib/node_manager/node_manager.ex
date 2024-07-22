@@ -16,7 +16,7 @@ defmodule NodeManager do
         data_node = emptiest_data_node()
         if map_size(:erpc.call(data_node, DatoAgent,:getAll,[])) >= @max_capacity
         do
-            Logger.info("base de datos llena")
+            {:reply,:error,state}
         else
             agent = :erpc.call(data_node,DatoRegistry,:find_agents,[]) |> List.first
             agent_value = elem(agent,2)
@@ -25,8 +25,9 @@ defmodule NodeManager do
              if not Enum.empty?(replicas) do
                 Enum.map(replicas,fn replica -> :erpc.call(replica,DatoAgent,:insert,[key,value]) end)
              end
+             {:reply,:ok,state}   
         end
-        {:reply,:ok,state}   
+        
     end
 
     def handle_call({:delete, key}, _from_pid, state) do
