@@ -7,7 +7,6 @@ defmodule OrquestadorAgent do
   end
 
   def init(initial_state) do
-    Logger.info("stoy vivo")
     {:ok, initial_state}
   end
 
