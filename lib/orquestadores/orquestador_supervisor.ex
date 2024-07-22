@@ -7,6 +7,7 @@ defmodule OrquestadorSupervisor do
 
   def init(_init_arg) do
     children = [
+      OrquestadorAgent,
       OrquestadorHordeRegistry,
       OrquestadorDynamicSupervisor
     ]

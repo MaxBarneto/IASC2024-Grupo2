@@ -15,11 +15,11 @@ defmodule KV.Application do
     topologies = [
       libcluster_strategy: [
         strategy: Cluster.Strategy.Gossip,
-        config:
-        [
+        config: [
           hosts: [:"a@127.0.0.1", :"b@127.0.0.1"],
-          port: numero_aleatorio_cluster]
+          port: 30001
         ]
+      ]
     ]
 
     children = [
