@@ -107,8 +107,9 @@ defmodule NodeManager do
     end
 
     def is_master_down(orquestadores) do
-        orquestadores |> Enums.all?(fn {id, _, _} -> !Orquestador.is_master(id) end)
+        orquestadores |> Enum.all?(fn {id, _, _} -> !Orquestador.is_master(id) end)
     end
+    
     
     #eprc call
     #:erpc.call(node,DatoRegistry,:find_all_pids,[]) 
