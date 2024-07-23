@@ -23,14 +23,25 @@ defmodule KVServer do
     end
   end
 
-  get "filter/datos/:value" do
+  get "filter/greather/datos/:value" do
     
     #query_params = conn.query_params
     #filter = Map.get(query_params, "filter", "default")
 
     IO.puts("Buscando dato para valores mayores que: #{value}")
+
+    result = Orquestador.find_by_value(value, ">")
+    send_resp(conn, 200, Jason.encode!(result))
+  end
+
+  get "filter/less/datos/:value" do
     
-    result = Orquestador.find_by_value(value)
+    #query_params = conn.query_params
+    #filter = Map.get(query_params, "filter", "default")
+
+    IO.puts("Buscando dato para valores menores que: #{value}")
+
+    result = Orquestador.find_by_value(value, "<")
     send_resp(conn, 200, Jason.encode!(result))
   end
 

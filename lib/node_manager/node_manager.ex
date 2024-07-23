@@ -58,9 +58,13 @@ defmodule NodeManager do
         GenServer.call(pid, {:insert, key, value})
     end
 
-    def get_values_greater_than(value) do
+    def get_values_greater_than(value, operation) do
         datos = get_all_data()
-        Enum.map(Enum.filter(datos, fn {_, v} -> v > value end), fn {_, v} -> v end)
+        if operation == ">" do
+            Enum.map(Enum.filter(datos, fn {_, v} -> v > value end), fn {_, v} -> v end)    
+        else 
+            Enum.map(Enum.filter(datos, fn {_, v} -> v < value end), fn {_, v} -> v end)    
+        end
     end
 
     def agent_list do

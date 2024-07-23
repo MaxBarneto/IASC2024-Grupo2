@@ -22,7 +22,9 @@ be found at <https://hexdocs.pm/kv>.
 # Startear agent
 {:ok, pid} = Datos.DynamicSupervisor.start_child(estado inicial,nombre,valor de asociacion con la replica) 
 
-ejemplo: {:ok, pid} = Datos.DynamicSupervisor.start_child(Map.new,"agent1",1)
+{:ok, pid} = Datos.DynamicSupervisor.start_child(Map.new,"agent1",1)
+OrquestadorDynamicSupervisor.start_child(:o1, :master)
+
 
 # Obtener el pid del node manager
 pid = Process.whereis(NodeManager)
