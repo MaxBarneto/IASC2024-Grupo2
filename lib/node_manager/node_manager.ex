@@ -21,7 +21,7 @@ defmodule NodeManager do
             agent = :erpc.call(data_node,DatoRegistry,:find_agents,[]) |> List.first
             agent_value = elem(agent,2)
             replicas = Enum.filter([Node.self()|Node.list()], 
-                fn node -> String.contains?(to_string(node),agent_value) && String.contains?(to_string(node), "replica") end)
+                fn node -> String.split(to_string(node),["-","_","@"]) |> Enum.at(1) == agent_value && String.contains?(to_string(node), "replica") end)
             :erpc.call(data_node, DatoAgent, :insert, [key,value])
              if not Enum.empty?(replicas) do
                 Enum.map(replicas,fn replica -> :erpc.call(replica,DatoAgent,:insert,[key,value]) end)

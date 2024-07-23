@@ -66,7 +66,7 @@ defmodule DatoAgent do
       if not Enum.empty?(DatoRegistry.find_agents) do
         value = DatoRegistry.find_agents |> List.first |> elem(2)
         replicas = Enum.filter([Node.self()|Node.list()], 
-                    fn node -> String.contains?(to_string(node),value) and 
+                    fn node -> String.split(to_string(node),["-","_","@"]) |> Enum.at(1) == value and 
                     String.contains?(to_string(node),"replica") end)
         replica_data = Enum.map(replicas, fn node -> :erpc.call(node,DatoAgent,:getAll,[])  end)
         Enum.filter(replica_data, fn map -> map_size(map) > 0 end) |> List.first()
