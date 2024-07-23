@@ -86,7 +86,7 @@ defmodule Orquestador do
   # end
 
   def insert(key, value) do
-    {orq_id, _, _} = OrquestadorHordeRegistry.get_any
+    {orq_id, _, _} = OrquestadorHordeRegistry.get_master
     case is_master(orq_id) do
       true -> GenServer.call(via_tuple(orq_id), {:insert, key, value})
       false -> {:error, "Solo el orquestador master puede insertar datos"} # TODO: redirigir al master

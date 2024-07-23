@@ -33,4 +33,8 @@ defmodule OrquestadorHordeRegistry do
 	def get_any do
     get_all() |> Enum.random
   end
+
+  def get_master do
+    get_all() |> Enum.filter(fn {id, _, _} -> Orquestador.is_master(id) end) |> List.first
+  end
 end
