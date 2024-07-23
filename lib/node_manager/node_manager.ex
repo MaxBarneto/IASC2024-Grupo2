@@ -86,7 +86,7 @@ defmodule NodeManager do
     def emptiest_data_node() do
         agent_nodes = agent_node_list()
         data_list = Enum.map(agent_nodes, fn node -> :erpc.call(node,DatoAgent,:getAll,[]) end)
-        lowest_size = Enum.map(data_list,fn x -> map_size(x) end) |> List.first
+        lowest_size = Enum.map(data_list,fn x -> map_size(x) end) |> Enum.sort |> List.first
         Enum.filter(agent_nodes, fn node -> (:erpc.call(node,DatoAgent,:getAll,[]) |> map_size()) == lowest_size end) |> List.first
     end
 
