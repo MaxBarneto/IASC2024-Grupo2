@@ -33,9 +33,13 @@ defmodule DatoRegistry do
   end
 
   def find_replicas_for(value) do
+    replicas = find_replicas()
+    Enum.filter(replicas, fn {_,_,y} -> (y == value) end)
+  end
+
+  def find_replicas() do
     list = DatoRegistry.find_all
-    replicas = Enum.filter(list, fn {x, _, _} -> String.contains?(x, "replica") end)
-    result = Enum.filter(replicas, fn {_,_,y} -> (y == value) end)
+    Enum.filter(list, fn {x, _, _} -> String.contains?(x, "replica") end)
   end
 
   def find_agents() do
@@ -47,6 +51,8 @@ defmodule DatoRegistry do
     list = DatoRegistry.find_all
     result = Enum.filter(list, fn {x,y,z} -> (y == pid) end) |> List.first()
   end
+
+  
 
   #{"agent:1", pid, "1"}, {"replica:1", pid, "1"}, {"replica:2", pid, "1"}
   #result = Enum.filter(list, fn {x, _, _} -> String.contains?(x, "replica") end)
