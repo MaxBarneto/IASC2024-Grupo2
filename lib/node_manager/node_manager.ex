@@ -12,24 +12,39 @@ defmodule NodeManager do
         {:ok, state}
     end
 
-    def handle_call({:insert, key, value}, _from_pid, state) do
+    def handle_call({:insert,key,value}, _from_pid, state) do
         data_node = emptiest_data_node()
-        if map_size(:erpc.call(data_node, DatoAgent,:getAll,[])) >= @max_capacity
-        do
-            {:reply,:error,state}
-        else
-            agent = :erpc.call(data_node,DatoRegistry,:find_agents,[]) |> List.first
-            agent_value = elem(agent,2)
-            replicas = Enum.filter([Node.self()|Node.list()], 
-                fn node -> String.split(to_string(node),["-","_","@"]) |> Enum.at(1) == agent_value && String.contains?(to_string(node), "replica") end)
-            :erpc.call(data_node, DatoAgent, :insert, [key,value])
-             if not Enum.empty?(replicas) do
-                Enum.map(replicas,fn replica -> :erpc.call(replica,DatoAgent,:insert,[key,value]) end)
-             end
-             {:reply,:ok,state}   
+        cond do
+            not Enum.empty?(get_value(key)) ->
+                agent = find_agent_that_has(key)
+                :erpc.call(agent, DatoAgent, :insert, [key,value])
+                {:reply,:ok,state}
+            map_size(:erpc.call(data_node, DatoAgent,:getAll,[])) >= @max_capacity ->
+                {:reply,:error,state}
+            true ->
+                :erpc.call(data_node, DatoAgent, :insert, [key,value])
+             {:reply,:ok,state} 
         end
-        
     end
+
+    # def handle_call({:insert, key, value}, _from_pid, state) do
+    #     data_node = emptiest_data_node()
+    #     if map_size(:erpc.call(data_node, DatoAgent,:getAll,[])) >= @max_capacity
+    #     do
+    #         {:reply,:error,state}
+    #     else
+    #         agent = :erpc.call(data_node,DatoRegistry,:find_agents,[]) |> List.first
+    #         agent_value = elem(agent,2)
+    #         replicas = Enum.filter([Node.self()|Node.list()], 
+    #             fn node -> String.split(to_string(node),["-","_","@"]) |> Enum.at(1) == agent_value && String.contains?(to_string(node), "replica") end)
+    #         :erpc.call(data_node, DatoAgent, :insert, [key,value])
+    #          if not Enum.empty?(replicas) do
+    #             Enum.map(replicas,fn replica -> :erpc.call(replica,DatoAgent,:insert,[key,value]) end)
+    #          end
+    #          {:reply,:ok,state}   
+    #     end
+        
+    # end
 
     def handle_call({:delete, key}, _from_pid, state) do
         Enum.map(agent_node_list(), fn node -> :erpc.call(node,DatoAgent,:delete,[key]) end)
@@ -65,6 +80,12 @@ defmodule NodeManager do
     def agent_node_list do
         Enum.filter([Node.self() | Node.list()], 
                     fn node -> not Enum.empty?(:erpc.call(node,DatoRegistry,:find_agents,[])) end)
+    end
+
+    def find_agent_that_has(key) do
+        agents = agent_node_list()
+        Enum.filter(agents, fn agent -> not is_nil(:erpc.call(agent,DatoAgent,:get,[key])) end)
+        |> List.first
     end
 
     def replica_node_list do
