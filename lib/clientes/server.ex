@@ -38,16 +38,6 @@ defmodule KVServer do
     end
   end
 
-  delete "/datos/:key" do
-    IO.puts("Eliminando la clave: #{key}")
-
-    case Orquestador.delete(key) do
-      :ok -> send_resp(conn, 200, "Deleted")
-      :error -> send_resp(conn, 404, "Not Found")
-    end
-  end
-
-
   match _ do
     send_resp(conn, 400, "Bad Request")
   end
