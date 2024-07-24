@@ -87,14 +87,6 @@ defmodule Orquestador do
   #   end
   # end
 
-  def insert2(key, value) do
-    validate_insert(key, value)
-    case OrquestadorHordeRegistry.get_master() do
-      [{orq_id, _, _}] -> GenServer.call(via_tuple(orq_id), {:insert, key, value})
-      [] -> :server_error
-    end
-  end
-
   def insert(key, value) do
     try do
       validate_insert(key, value)
