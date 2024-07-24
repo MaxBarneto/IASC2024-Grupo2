@@ -28,8 +28,12 @@ defmodule NodeManager do
     end
 
     def handle_call({:delete, key}, _from_pid, state) do
-        Enum.map(agent_node_list(), fn node -> :erpc.call(node,DatoAgent,:delete,[key]) end)
-        {:reply, "dato borrado", state}
+        if Enum.empty?(get_value(key)) do
+            {:reply,:error,state}
+        else
+            Enum.map(agent_node_list(), fn node -> :erpc.call(node,DatoAgent,:delete,[key]) end)
+            {:reply, "dato borrado", state}
+        end
     end
 
     def handle_call({:get, key}, _from_pid, state) do
@@ -103,10 +107,4 @@ defmodule NodeManager do
         orquestadores |> Enum.all?(fn {id, _, _} -> !Orquestador.is_master(id) end)
     end
     
-    
-    #eprc call
-    #:erpc.call(node,DatoRegistry,:find_all_pids,[]) 
-    #:erpc.call(Node.list,DatoAgent,:insert,[remote agent pid,:a,"a"])
-    #multi call genserver
-    #GenServer.multi_call([node() | Node.list()],NodeManager, {:insert,:a,"a"})
 end
