@@ -39,12 +39,8 @@ defmodule KV.Application do
       NodeObserver.Supervisor,
     ]
 
-    opts = [strategy: :one_for_one, name: KV.SuperSupervisor, max_seconds: 5, max_restarts: 3]
+    opts = [strategy: :one_for_one, name: KV.SuperSupervisor, max_seconds: 5, max_restarts: 5]
 
-    case Supervisor.start_link(children, opts) do
-      {:ok, pid} ->
-        Init.create_orchestrators()
-        {:ok, pid}
-    end
+    Supervisor.start_link(children, opts)
   end
 end

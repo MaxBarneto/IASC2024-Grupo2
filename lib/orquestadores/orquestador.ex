@@ -3,7 +3,6 @@ defmodule Orquestador do
   require Logger
 
   @master :master
-  #@slave :slave
 
   def child_spec({orchestrator_id, type}) do
     %{id: get_process_name(orchestrator_id),
@@ -53,6 +52,10 @@ defmodule Orquestador do
   def handle_call({:update_state, type}, _from_pid, _state) do
     OrquestadorAgent.update(type)
     {:reply, type, type}
+  end
+
+  def handle_call(:state, _from_pid, state) do
+    {:reply, state, state}
   end
 
   def handle_call({:insert, key, value}, _from_pid, state) do
