@@ -44,12 +44,12 @@ defmodule DatoRegistry do
 
   def find_agents() do
     list = DatoRegistry.find_all
-    result = Enum.filter(list, fn {x, _, _} -> String.contains?(x, "agent") end)
+    Enum.filter(list, fn {x, _, _} -> String.contains?(x, "agent") end)
   end
 
   def find_agent_by_pid(pid) do
     list = DatoRegistry.find_all
-    result = Enum.filter(list, fn {x,y,z} -> (y == pid) end) |> List.first()
+    Enum.filter(list, fn {_x,y,_z} -> (y == pid) end) |> List.first()
   end
 
   
