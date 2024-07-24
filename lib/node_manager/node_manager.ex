@@ -27,7 +27,7 @@ defmodule NodeManager do
              {:reply,:ok,state}
         end
     end
-    
+
     def handle_call({:delete, key}, _from_pid, state) do
         if Enum.empty?(get_value(key)) do
             {:reply,:error,state}
@@ -60,9 +60,9 @@ defmodule NodeManager do
     def get_values_greater_than(value, operation) do
         datos = get_all_data()
         if operation == ">" do
-            Enum.map(Enum.filter(datos, fn {_, v} -> v > value end), fn {_, v} -> v end)    
-        else 
-            Enum.map(Enum.filter(datos, fn {_, v} -> v < value end), fn {_, v} -> v end)    
+            Enum.map(Enum.filter(datos, fn {_, v} -> v > value end), fn {_, v} -> v end)
+        else
+            Enum.map(Enum.filter(datos, fn {_, v} -> v < value end), fn {_, v} -> v end)
         end
     end
 
@@ -120,4 +120,10 @@ defmodule NodeManager do
     def is_master_down(orquestadores) do
         orquestadores |> Enum.all?(fn {id, _, _} -> !Orquestador.is_master(id) end)
     end
+
+    def get_all_data() do
+        dato_List = Enum.map(agent_node_list(), fn node -> :erpc.call(node,DatoAgent,:getAll,[])  end)
+        datos = List.foldl(dato_List,%{}, fn x, acc -> Map.merge(acc, x) end)
+    end
+
 end
