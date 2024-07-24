@@ -3,7 +3,7 @@ defmodule Orquestador do
   require Logger
 
   @master :master
-  @slave :slave
+  #@slave :slave
 
   def child_spec({orchestrator_id, type}) do
     %{id: get_process_name(orchestrator_id),
@@ -50,23 +50,14 @@ defmodule Orquestador do
     {:reply, dato, state}
   end
 
-  def handle_call({:insert, key, value}, _from_pid, state) do
-    result = NodeManager.insert(key, value)
-    {:reply, result, state}
-  end
-
-  def handle_cast({:delete, key}, state) do
-    DatoAgent.delete(key)
-    {:noreply, state}
-  end
-
   def handle_call({:update_state, type}, _from_pid, _state) do
     OrquestadorAgent.update(type)
     {:reply, type, type}
   end
 
-  def handle_call(:state, _from_pid, state) do
-    {:reply, state, state}
+  def handle_call({:insert, key, value}, _from_pid, state) do
+    result = NodeManager.insert(key, value)
+    {:reply, result, state}
   end
 
   def handle_call({:find_by_value, value, operation}, _from_pid, state) do
@@ -74,13 +65,20 @@ defmodule Orquestador do
     {:reply, datos, state}
   end
 
+  def handle_call({:delete, key}, _from_pid, state) do
+    result = NodeManager.delete(key)
+    {:reply, result, state}
+  end
+  
   def find(identifier, key) do
     GenServer.call(via_tuple(identifier), {:find, key})
   end
 
   def find(key) do
-    {orq_id, _, _} = OrquestadorHordeRegistry.get_any
-    GenServer.call(via_tuple(orq_id), {:find, key})
+    case OrquestadorHordeRegistry.get_any() do
+      {orq_id, _, _} -> GenServer.call(via_tuple(orq_id), {:find, key})
+      _ -> :server_error
+    end
   end
 
   # def insert(identifier, key, value) do
@@ -91,12 +89,17 @@ defmodule Orquestador do
   # end
 
   def insert(key, value) do
-    {orq_id, _, _} = OrquestadorHordeRegistry.get_master
-    case is_master(orq_id) do
-      true -> GenServer.call(via_tuple(orq_id), {:insert, key, value})
-      false -> {:error, "Solo el orquestador master puede insertar datos"} # TODO: redirigir al master
+    try do
+      validate_insert(key, value)
+      case OrquestadorHordeRegistry.get_master() do
+        [{orq_id, _, _}] -> GenServer.call(via_tuple(orq_id), {:insert, key, value})
+        [] -> :server_error
+      end
+    rescue
+      e in RuntimeError -> {:error, e.message}
     end
   end
+
 
   def delete(identifier, key) do
     GenServer.cast(via_tuple(identifier), {:delete, key})
@@ -105,6 +108,13 @@ defmodule Orquestador do
   def find_by_value(value, operation) do
     {orq_id, _, _} = OrquestadorHordeRegistry.get_any
     GenServer.call(via_tuple(orq_id), {:find_by_value, value, operation})
+  end
+  
+  def delete(key) do
+    case OrquestadorHordeRegistry.get_any() do
+      {orq_id, _, _} -> GenServer.call(via_tuple(orq_id), {:delete, key})
+      _ -> :server_error
+    end
   end
 
   def whereis(identifier) do
@@ -133,4 +143,22 @@ defmodule Orquestador do
   def stop(identifier) do
     GenServer.stop(via_tuple(identifier), :normal)
   end
+
+  def validate_insert(key, value) do
+    IO.puts("Validando el tamaño de clave y valor")
+    size_max_key = Application.fetch_env!(:kv, :size_max_key)
+    size_max_value = Application.fetch_env!(:kv, :size_max_value)
+
+    validate_size(key, size_max_key)
+    validate_size(value, size_max_value)
+  end
+
+  def validate_size(param, size) do
+    param_size = byte_size(param)
+    if param_size > size do
+      raise "El parametro #{param} no puede ser mayor a #{size} bytes"
+    end
+    IO.puts("El tamaño de #{param} es valido")
+  end
+
 end
