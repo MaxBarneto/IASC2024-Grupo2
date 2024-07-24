@@ -43,8 +43,7 @@ defmodule NodeManager do
     end
 
     def handle_call({:get_all}, _from_pid, state) do
-        dato_List = Enum.map(agent_node_list(), fn node -> :erpc.call(node,DatoAgent,:getAll,[])  end)
-        datos = List.foldl(dato_List,%{}, fn x, acc -> Map.merge(acc, x) end)
+        datos = get_all_data()
         {:reply, datos,state}
     end
 
@@ -56,6 +55,15 @@ defmodule NodeManager do
     def insert(key, value) do
         pid = Process.whereis(NodeManager)
         GenServer.call(pid, {:insert, key, value})
+    end
+
+    def get_values_greater_than(value, operation) do
+        datos = get_all_data()
+        if operation == ">" do
+            Enum.map(Enum.filter(datos, fn {_, v} -> v > value end), fn {_, v} -> v end)    
+        else 
+            Enum.map(Enum.filter(datos, fn {_, v} -> v < value end), fn {_, v} -> v end)    
+        end
     end
 
     def delete(key) do
