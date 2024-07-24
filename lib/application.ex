@@ -42,5 +42,8 @@ defmodule KV.Application do
     opts = [strategy: :one_for_one, name: KV.SuperSupervisor, max_seconds: 5, max_restarts: 3]
 
     Supervisor.start_link(children, opts)
+
+    Init.create_orchestrators()
+
   end
 end
