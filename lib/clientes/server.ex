@@ -1,8 +1,10 @@
 defmodule KVServer do
   use Plug.Router
 
+  plug :fetch_query_params
   plug :match
   plug :dispatch
+
 
   plug(Plug.Parsers,
     parsers: [:json],
@@ -23,25 +25,21 @@ defmodule KVServer do
     end
   end
 
-  get "filter/greather/datos/:value" do
+  get "datos/filter/greather/" do
     
-    #query_params = conn.query_params
-    #filter = Map.get(query_params, "filter", "default")
+    filterValue = Map.get(conn.query_params, "filter", "")
+    IO.puts("Buscando dato para valores mayores que: #{filterValue}")
 
-    IO.puts("Buscando dato para valores mayores que: #{value}")
-
-    result = Orquestador.find_by_value(value, ">")
+    result = Orquestador.find_by_value(filterValue, ">")
     send_resp(conn, 200, Jason.encode!(result))
   end
 
-  get "filter/less/datos/:value" do
+  get "datos/filter/less" do
     
-    #query_params = conn.query_params
-    #filter = Map.get(query_params, "filter", "default")
+    filterValue = Map.get(conn.query_params, "filter", "")
+    IO.puts("Buscando dato para valores menores que: #{filterValue}")
 
-    IO.puts("Buscando dato para valores menores que: #{value}")
-
-    result = Orquestador.find_by_value(value, "<")
+    result = Orquestador.find_by_value(filterValue, "<")
     send_resp(conn, 200, Jason.encode!(result))
   end
 
@@ -68,3 +66,5 @@ end
 # Curl examples
 # curl -X GET localhost:<PORT>/datos/b
 # curl -X POST localhost:<PORT>/datos --data '{"key":"b","value":"bbb"}'
+# curl -X GET localhost:<PORT>/datos/filter/less?filter=hola
+# curl -X GET localhost:<PORT>/datos/filter/greather?filter=hola
