@@ -104,6 +104,12 @@ defmodule NodeManager do
         Enum.filter(agent_nodes, fn node -> (:erpc.call(node,DatoAgent,:getAll,[]) |> map_size()) == lowest_size end) |> List.first
     end
 
+    def get_all_data() do
+        dato_List = Enum.map(agent_node_list(), fn node -> :erpc.call(node,DatoAgent,:getAll,[])  end)
+        List.foldl(dato_List,%{}, fn x, acc -> Map.merge(acc, x) end)
+    end
+    
+
     # Logica Orquestadores
     def node_down(node_id) do
         orquestadores =
