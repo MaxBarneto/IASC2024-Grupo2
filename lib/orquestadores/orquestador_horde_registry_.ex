@@ -31,10 +31,13 @@ defmodule OrquestadorHordeRegistry do
   end
 
 	def get_any do
-    get_all() |> Enum.random
+    case get_all() do
+      [] -> nil
+      orquestadores -> Enum.random(orquestadores)
+    end
   end
 
   def get_master do
-    get_all() |> Enum.filter(fn {id, _, _} -> Orquestador.is_master(id) end) |> List.first
+    get_all() |> Enum.filter(fn {id, _, _} -> Orquestador.is_master(id) end)
   end
 end

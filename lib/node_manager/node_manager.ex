@@ -96,7 +96,7 @@ defmodule NodeManager do
           OrquestadorHordeRegistry.get_all
           |>Enum.filter(fn {_, _, node} -> node != node_id end)
 
-        if is_master_down(orquestadores) do
+        if !Enum.empty?(orquestadores) && is_master_down(orquestadores) do
           {id, _pid, node} = orquestadores |> List.first
           Orquestador.set_as_master(id)
           Logger.info("---- Nuevo nodo master: #{node}, #{id} ----")
