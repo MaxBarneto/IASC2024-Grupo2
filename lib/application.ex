@@ -4,43 +4,20 @@ defmodule KV.Application do
   def start(_start_type, _start_targs) do
     # Asegúrate de iniciar el generador de números aleatorios
     :rand.seed(:exsplus, :os.timestamp())
-    IO.puts("_start_targs: #{_start_targs}")
-
-    mix_env = System.get_env("MIX_ENV") || "nodo0"
-    IO.puts("MIX_ENV: #{mix_env}")
-
-    config = case System.get_env("MIX_ENV") do
-      "nodo0" -> "/config/nodo0.exs"
-      "nodo1" -> "/config/nodo1.exs"
-      "nodo2" -> "/config/nodo2.exs"
-      _ -> "/config/config.exs"
-    end
-    #port = case key_port do
-    #  nil -> 5000 + :rand.uniform(1001) - 1
-    #  _ -> Application.fetch_env!(:"#{key_port}", :port)
-    #end
 
     # Genera un número aleatorio entre 5000 y 6000
+    numero_aleatorio = 5000 + :rand.uniform(1001) - 1
     numero_aleatorio_cluster = 5000 + :rand.uniform(1001) - 1
 
-    #IO.puts("Puerto para el server #{port}")
+    IO.puts("Número aleatorio para Plug.Cowboy entre 5000 y 6000: #{numero_aleatorio}")
     IO.puts("Número aleatorio para libcluster entre 5000 y 6000: #{numero_aleatorio_cluster}")
 
-     # Definir el archivo de configuración según el entorno
-     #file = Path.join(["#{__DIR__}", config])
-    file = Path.expand(config, __DIR__)
-
-    IO.puts("Loading configuration from #{file}")
-
-    if File.exists?(file) do
-      Config.Reader.read!(file)
-    else
-      IO.warn("Configuration file #{file} does not exist")
-    end
-
-    value = Application.fetch_env!(:kv, :port)
-    IO.puts("Puerto para #{mix_env} port: #{value}")
-
+    size_max_key = Application.fetch_env!(:kv, :size_max_key)
+    size_max_value = Application.fetch_env!(:kv, :size_max_value)
+    max_capacity_for_node = Application.fetch_env!(:kv, :max_capacity_for_node)
+    IO.puts("Tamaño maximo para las claves: #{size_max_key}")
+    IO.puts("Tamaño maximo para los valores: #{size_max_value}")
+    IO.puts("Maxima capacidad de claves para los nodos: #{max_capacity_for_node}")
 
     topologies = [
       libcluster_strategy: [
@@ -54,7 +31,7 @@ defmodule KV.Application do
 
     children = [
       {Cluster.Supervisor, [topologies, [name: KV.ClusterSupervisor]]}, #libcluster
-      {Plug.Cowboy, scheme: :http, plug: KVServer, options: [port: 4000]},
+      {Plug.Cowboy, scheme: :http, plug: KVServer, options: [port: numero_aleatorio]},
       #Supervisores
       Datos.Supervisor,
       NodeManager.Supervisor,

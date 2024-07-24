@@ -2,7 +2,7 @@ defmodule NodeManager do
     use GenServer
     require Logger
 
-    @max_capacity 2
+#    @max_capacity 2
 
     def start_link(_init_arg) do
         GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
@@ -14,16 +14,17 @@ defmodule NodeManager do
 
     def handle_call({:insert,key,value}, _from_pid, state) do
         data_node = emptiest_data_node()
+        max_capacity_for_node = Application.fetch_env!(:kv, :max_capacity_for_node)
         cond do
             not Enum.empty?(get_value(key)) ->
                 agent = find_agent_that_has(key)
                 :erpc.call(agent, DatoAgent, :insert, [key,value])
                 {:reply,:ok,state}
-            map_size(:erpc.call(data_node, DatoAgent,:getAll,[])) >= @max_capacity ->
+            map_size(:erpc.call(data_node, DatoAgent,:getAll,[])) >= max_capacity_for_node ->
                 {:reply,:error,state}
             true ->
                 :erpc.call(data_node, DatoAgent, :insert, [key,value])
-             {:reply,:ok,state} 
+             {:reply,:ok,state}
         end
     end
 
@@ -35,15 +36,15 @@ defmodule NodeManager do
     #     else
     #         agent = :erpc.call(data_node,DatoRegistry,:find_agents,[]) |> List.first
     #         agent_value = elem(agent,2)
-    #         replicas = Enum.filter([Node.self()|Node.list()], 
+    #         replicas = Enum.filter([Node.self()|Node.list()],
     #             fn node -> String.split(to_string(node),["-","_","@"]) |> Enum.at(1) == agent_value && String.contains?(to_string(node), "replica") end)
     #         :erpc.call(data_node, DatoAgent, :insert, [key,value])
     #          if not Enum.empty?(replicas) do
     #             Enum.map(replicas,fn replica -> :erpc.call(replica,DatoAgent,:insert,[key,value]) end)
     #          end
-    #          {:reply,:ok,state}   
+    #          {:reply,:ok,state}
     #     end
-        
+
     # end
 
     def handle_call({:delete, key}, _from_pid, state) do
@@ -76,9 +77,9 @@ defmodule NodeManager do
         agents = DatoRegistry.find_agents()
         agent_pids = Enum.map(agents, fn {_,x,_} -> x end)
     end
-    
+
     def agent_node_list do
-        Enum.filter([Node.self() | Node.list()], 
+        Enum.filter([Node.self() | Node.list()],
                     fn node -> not Enum.empty?(:erpc.call(node,DatoRegistry,:find_agents,[])) end)
     end
 
@@ -89,7 +90,7 @@ defmodule NodeManager do
     end
 
     def replica_node_list do
-        Enum.filter([Node.self() | Node.list()], 
+        Enum.filter([Node.self() | Node.list()],
                     fn node -> not Enum.empty?(:erpc.call(node,DatoRegistry,:find_replicas,[])) end)
     end
 
@@ -131,10 +132,10 @@ defmodule NodeManager do
     def is_master_down(orquestadores) do
         orquestadores |> Enum.all?(fn {id, _, _} -> !Orquestador.is_master(id) end)
     end
-    
-    
+
+
     #eprc call
-    #:erpc.call(node,DatoRegistry,:find_all_pids,[]) 
+    #:erpc.call(node,DatoRegistry,:find_all_pids,[])
     #:erpc.call(Node.list,DatoAgent,:insert,[remote agent pid,:a,"a"])
     #multi call genserver
     #GenServer.multi_call([node() | Node.list()],NodeManager, {:insert,:a,"a"})

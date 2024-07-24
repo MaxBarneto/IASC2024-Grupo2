@@ -37,11 +37,12 @@ defmodule KVServer do
       :ok -> send_resp(conn, 201, "Created")
       :error -> send_resp(conn, 409, "Stack overflow")
       :server_error -> send_resp(conn, 500, "Internal Server Error")
+      {:error, reason} -> send_resp(conn, 400, "Bad Request: #{reason}")
     end
   end
 
   match _ do
-    send_resp(conn, 400, "Bad Request")
+    send_resp(conn, 404, "Not found")
   end
 end
 
