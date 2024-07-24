@@ -45,10 +45,6 @@ defmodule KV.Application do
       {:ok, pid} ->
         Init.create_orchestrators()
         {:ok, pid}
-      {:error, {:already_started, pid}} ->
-        {:ok, pid}
-      {:error, reason} ->
-        {:error, reason}
     end
   end
 end
