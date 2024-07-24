@@ -8,10 +8,13 @@ defmodule Init do
         OrquestadorDynamicSupervisor.start_child(:o2, :slave)
       :"replica_1@127.0.0.1" ->
         OrquestadorDynamicSupervisor.start_child(:o3, :slave)
+        Orquestador.insert("key1", "value1")
+        Orquestador.insert("key2", "value2")
       :"replica_2@127.0.0.1" ->
         OrquestadorDynamicSupervisor.start_child(:o4, :slave)
-      _ ->
-        :ok
+        Orquestador.insert("key3", "value3")
+        Orquestador.insert("key4", "value4")
+      _ -> IO.puts("No se ha encontrado el nodo")
     end
   end
 end
