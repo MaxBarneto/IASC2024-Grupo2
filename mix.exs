@@ -1,4 +1,4 @@
-defmodule KV.MixProject do
+defmodule Kv.MixProject do
   use Mix.Project
 
   def project do
@@ -11,19 +11,19 @@ defmodule KV.MixProject do
     ]
   end
 
-  # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger, :eex, :wx, :observer, :runtime_tools],
+      extra_applications: [:logger, :wx, :observer , :eex, :runtime_tools],
       mod: {KV.Application, []}
     ]
   end
 
-  # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
       {:libcluster, "~> 3.3"},
-      {:horde, "~> 0.8.3"}
+      {:horde, "~> 0.8.3"},
+      {:plug_cowboy, "~> 2.6"},
+      {:jason, "~> 1.3"}
     ]
   end
 end

@@ -2,31 +2,72 @@ defmodule DatoAgent do
   use Agent
   require Logger
 
-  def start(initial_state) do
-    Agent.start(fn -> initial_state end, name: __MODULE__)
+  def start_link(initial_state, name, value) do
+    {:ok, pid} = Agent.start_link(fn -> initial_state end, name: {:via, Registry, {DatoRegistry, name, value}})
+    DatoAgent.init(pid)
   end
 
-  def start_link(initial_state) do
-    Agent.start_link(fn -> initial_state end, name: __MODULE__)
+  def init(pid) do
+    replicated_data = DatoAgent.get_data_from_replicas()
+    if not is_nil(replicated_data) do
+      Agent.update(pid,fn (state) -> Map.merge(state,replicated_data) end) 
+    end
+    {:ok, pid}
   end
 
-  def init(initial_state) do
-    {:ok, initial_state}
+  def child_spec({state, name, value}) do
+    %{id: name, start: {__MODULE__, :start_link, [state, name, value]}, type: :worker, restart: :permanent}
   end
 
   def getAll() do
-    Agent.get(DatoAgent, fn state -> state end)
+    pid = DatoRegistry.find_all_pids |> List.first
+    Agent.get(pid, fn state -> state end)
   end
 
   def get(key) do
-    Agent.get(DatoAgent, &Map.get(&1, key))
+    pid = DatoRegistry.find_all_pids |> List.first
+    Agent.get(pid, fn(state) -> Map.get(state, key) end)
   end
 
   def insert(key, value) do
-    Agent.update(DatoAgent, &Map.put(&1, key, value))
+    pid = DatoRegistry.find_all_pids |> List.first
+    Agent.update(pid, fn(state) -> Map.put(state, key, value) end)
+    value = DatoRegistry.find_agent_by_pid(pid) |> elem(2)
+    replicas = Enum.filter([Node.self()|Node.list()], 
+                fn node -> 
+                  String.split(to_string(node),["-","_","@"]) |> Enum.at(1) == value 
+                  and String.contains?(to_string(node), "replica") end)
+    if not Enum.empty?(replicas) do
+      Enum.map(replicas, fn replica -> :erpc.call(replica,DatoAgent,:update,[getAll()]) end)
+    end
+  end
+  
+  def delete(key) do
+    pid = DatoRegistry.find_all_pids |> List.first
+    Agent.update(pid, fn(state) -> Map.delete(state, key) end)
+    value = DatoRegistry.find_agent_by_pid(pid) |> elem(2)
+    replicas = Enum.filter([Node.self()|Node.list()], 
+                fn node -> 
+                  String.split(to_string(node),["-","_","@"]) |> Enum.at(1) == value 
+                  and String.contains?(to_string(node), "replica") end)
+    if not Enum.empty?(replicas) do
+      Enum.map(replicas, fn replica -> :erpc.call(replica,DatoAgent,:update,[getAll()]) end)
+    end
   end
 
-  def delete(key) do
-    Agent.update(DatoAgent, &Map.delete(&1, key))
+  def update(map) do
+    pid = DatoRegistry.find_all_pids |> List.first
+    Agent.update(pid, fn(_state) -> map end)
+  end
+
+  def get_data_from_replicas() do
+      if not Enum.empty?(DatoRegistry.find_agents) do
+        value = DatoRegistry.find_agents |> List.first |> elem(2)
+        replicas = Enum.filter([Node.self()|Node.list()], 
+                    fn node -> String.split(to_string(node),["-","_","@"]) |> Enum.at(1) == value and 
+                    String.contains?(to_string(node),"replica") end)
+        replica_data = Enum.map(replicas, fn node -> :erpc.call(node,DatoAgent,:getAll,[])  end)
+        Enum.filter(replica_data, fn map -> map_size(map) > 0 end) |> List.first()
+      end
   end
 end
