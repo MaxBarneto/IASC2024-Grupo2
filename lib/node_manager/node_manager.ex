@@ -33,7 +33,7 @@ defmodule NodeManager do
             {:reply,:error,state}
         else
             Enum.map(agent_node_list(), fn node -> :erpc.call(node,DatoAgent,:delete,[key]) end)
-            {:reply, "dato borrado", state}
+            {:reply, :ok, state}
         end
     end
 
@@ -56,6 +56,11 @@ defmodule NodeManager do
     def insert(key, value) do
         pid = Process.whereis(NodeManager)
         GenServer.call(pid, {:insert, key, value})
+    end
+
+    def delete(key) do
+        pid = Process.whereis(NodeManager)
+        GenServer.call(pid, {:delete, key})
     end
 
     def agent_list do
@@ -107,6 +112,4 @@ defmodule NodeManager do
     def is_master_down(orquestadores) do
         orquestadores |> Enum.all?(fn {id, _, _} -> !Orquestador.is_master(id) end)
     end
-    
 end
-
