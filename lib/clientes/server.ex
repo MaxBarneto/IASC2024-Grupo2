@@ -46,15 +46,16 @@ defmodule KVServer do
     case Orquestador.delete(key) do
       :ok -> send_resp(conn, 200, "Deleted")
       :error -> send_resp(conn, 404, "Not Found")
+      :server_error -> send_resp(conn, 500, "Internal Server Error")
     end
   end
-
 
   match _ do
     send_resp(conn, 400, "Bad Request")
   end
 end
 
-# Curl examples
+# Examples
 # curl -X GET localhost:<PORT>/datos/b
 # curl -X POST localhost:<PORT>/datos --data '{"key":"b","value":"bbb"}'
+# curl -X DELETE localhost:<PORT>/datos/:key

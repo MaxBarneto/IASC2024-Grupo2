@@ -56,13 +56,11 @@ defmodule DatoAgent do
     if not Enum.empty?(replicas) do
       Enum.map(replicas, fn replica -> :erpc.call(replica,DatoAgent,:update,[getAll()]) end)
     end
-    
   end
 
   def update(map) do
     pid = DatoRegistry.find_all_pids |> List.first
     Agent.update(pid, fn(state) -> map end)
-
   end
 
   def data_size() do
@@ -80,7 +78,5 @@ defmodule DatoAgent do
         replica_data = Enum.map(replicas, fn node -> :erpc.call(node,DatoAgent,:getAll,[])  end)
         Enum.filter(replica_data, fn map -> map_size(map) > 0 end) |> List.first()
       end
-
   end
-
 end

@@ -55,9 +55,9 @@ defmodule Orquestador do
     {:reply, result, state}
   end
 
-  def handle_cast({:delete, key}, state) do
-    DatoAgent.delete(key)
-    {:noreply, state}
+  def handle_call({:delete, key}, _from_pid, state) do
+    result = NodeManager.delete(key)
+    {:reply, result, state}
   end
 
   def handle_call({:update_state, type}, _from_pid, _state) do
@@ -99,8 +99,10 @@ defmodule Orquestador do
   end
 
   def delete(key) do
-    {orq_id, _, _} = OrquestadorHordeRegistry.get_any
-    GenServer.call(via_tuple(orq_id), {:delete, key})
+    case OrquestadorHordeRegistry.get_any() do
+      {orq_id, _, _} -> GenServer.call(via_tuple(orq_id), {:delete, key})
+      _ -> :server_error
+    end
   end
 
   def whereis(identifier) do
