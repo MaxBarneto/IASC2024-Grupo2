@@ -35,6 +35,7 @@ defmodule KVServer do
     case Orquestador.insert(key, value) do
       :ok -> send_resp(conn, 201, "Created")
       :error -> send_resp(conn, 409, "Stack overflow")
+      :server_error -> send_resp(conn, 500, "Internal Server Error")
     end
   end
 
