@@ -15,19 +15,25 @@ defmodule Orquestador do
   end
 
   def start_link(orchestrator_id, type) do
-    name = via_tuple(orchestrator_id)
-    GenServer.start_link(__MODULE__, {orchestrator_id, type}, name: name)
+    if type == @master && exists_master() do
+      {:error, "Ya existe un orquestador master"}
+    else
+      name = via_tuple(orchestrator_id)
+      GenServer.start_link(__MODULE__, {orchestrator_id, type}, name: name)
+    end
   end
 
   def init({orchestrator_id, type}) do
     Process.flag(:trap_exit, true)
-    Logger.info("Orchestrator created, identifier: #{orchestrator_id} - type: #{type}")
-    {:ok, type}
+    state = OrquestadorAgent.get
+    state = if is_nil(state) do type else state end
+    Logger.info("Orchestrator created, identifier: #{orchestrator_id} - type: #{state}")
+    OrquestadorAgent.update(state)
+    {:ok, state}
   end
 
-  def terminate(_reason, _state) do
-    Logger.info("Me mori")
-    #save_state(state)
+  def terminate(_reason, state) do
+    OrquestadorAgent.update(state)
   end
 
   defp via_tuple(orchestrator_id) do
@@ -55,6 +61,7 @@ defmodule Orquestador do
   end
 
   def handle_call({:update_state, type}, _from_pid, _state) do
+    OrquestadorAgent.update(type)
     {:reply, type, type}
   end
 
@@ -67,8 +74,10 @@ defmodule Orquestador do
   end
 
   def find(key) do
-    {orq_id, _, _} = OrquestadorHordeRegistry.get_any
-    GenServer.call(via_tuple(orq_id), {:find, key})
+    case OrquestadorHordeRegistry.get_any() do
+      {orq_id, _, _} -> GenServer.call(via_tuple(orq_id), {:find, key})
+      _ -> :server_error
+    end
   end
 
   # def insert(identifier, key, value) do
@@ -79,10 +88,9 @@ defmodule Orquestador do
   # end
 
   def insert(key, value) do
-    {orq_id, _, _} = OrquestadorHordeRegistry.get_any
-    case is_master(orq_id) do
-      true -> GenServer.call(via_tuple(orq_id), {:insert, key, value})
-      false -> {:error, "Solo el orquestador master puede insertar datos"} # TODO: redirigir al master
+    case OrquestadorHordeRegistry.get_master() do
+      [{orq_id, _, _}] -> GenServer.call(via_tuple(orq_id), {:insert, key, value})
+      [] -> :server_error
     end
   end
 
@@ -111,5 +119,14 @@ defmodule Orquestador do
 
   def is_master(identifier) do
     GenServer.call(via_tuple(identifier), :state) == @master
+  end
+
+  def exists_master do
+    OrquestadorHordeRegistry.get_all
+    |> Enum.any?(fn {id, _, _} -> is_master(id) end)
+  end
+
+  def stop(identifier) do
+    GenServer.stop(via_tuple(identifier), :normal)
   end
 end
