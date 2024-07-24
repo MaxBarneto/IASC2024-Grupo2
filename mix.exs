@@ -23,7 +23,7 @@ defmodule Kv.MixProject do
       {:libcluster, "~> 3.3"},
       {:horde, "~> 0.8.3"},
       {:plug_cowboy, "~> 2.6"},
-      {:jason, "~> 1.3"},
+      {:jason, "~> 1.3"}
     ]
   end
 end

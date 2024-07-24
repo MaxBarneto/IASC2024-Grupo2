@@ -2,7 +2,7 @@ defmodule NodeManager do
     use GenServer
     require Logger
 
-    @max_capacity 2
+#    @max_capacity 2
 
     def start_link(_init_arg) do
         GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
@@ -14,19 +14,20 @@ defmodule NodeManager do
 
     def handle_call({:insert,key,value}, _from_pid, state) do
         data_node = emptiest_data_node()
+        max_capacity_for_node = Application.fetch_env!(:kv, :max_capacity_for_node)
         cond do
             not Enum.empty?(get_value(key)) ->
                 agent = find_agent_that_has(key)
                 :erpc.call(agent, DatoAgent, :insert, [key,value])
                 {:reply,:ok,state}
-            map_size(:erpc.call(data_node, DatoAgent,:getAll,[])) >= @max_capacity ->
+            map_size(:erpc.call(data_node, DatoAgent,:getAll,[])) >= max_capacity_for_node ->
                 {:reply,:error,state}
             true ->
                 :erpc.call(data_node, DatoAgent, :insert, [key,value])
-             {:reply,:ok,state} 
+             {:reply,:ok,state}
         end
     end
-
+    
     def handle_call({:delete, key}, _from_pid, state) do
         if Enum.empty?(get_value(key)) do
             {:reply,:error,state}
@@ -61,9 +62,9 @@ defmodule NodeManager do
         agents = DatoRegistry.find_agents()
         Enum.map(agents, fn {_,x,_} -> x end)
     end
-    
+
     def agent_node_list do
-        Enum.filter([Node.self() | Node.list()], 
+        Enum.filter([Node.self() | Node.list()],
                     fn node -> not Enum.empty?(:erpc.call(node,DatoRegistry,:find_agents,[])) end)
     end
 
@@ -74,7 +75,7 @@ defmodule NodeManager do
     end
 
     def replica_node_list do
-        Enum.filter([Node.self() | Node.list()], 
+        Enum.filter([Node.self() | Node.list()],
                     fn node -> not Enum.empty?(:erpc.call(node,DatoRegistry,:find_replicas,[])) end)
     end
 
@@ -108,3 +109,4 @@ defmodule NodeManager do
     end
     
 end
+

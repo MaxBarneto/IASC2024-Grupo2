@@ -1,7 +1,7 @@
 defmodule KV.Application do
   use Application
 
-  def start(_start_type, _start_args) do
+  def start(_start_type, _start_targs) do
     # Asegúrate de iniciar el generador de números aleatorios
     :rand.seed(:exsplus, :os.timestamp())
 
@@ -11,6 +11,13 @@ defmodule KV.Application do
 
     IO.puts("Número aleatorio para Plug.Cowboy entre 5000 y 6000: #{numero_aleatorio}")
     IO.puts("Número aleatorio para libcluster entre 5000 y 6000: #{numero_aleatorio_cluster}")
+
+    size_max_key = Application.fetch_env!(:kv, :size_max_key)
+    size_max_value = Application.fetch_env!(:kv, :size_max_value)
+    max_capacity_for_node = Application.fetch_env!(:kv, :max_capacity_for_node)
+    IO.puts("Tamaño maximo para las claves: #{size_max_key}")
+    IO.puts("Tamaño maximo para los valores: #{size_max_value}")
+    IO.puts("Maxima capacidad de claves para los nodos: #{max_capacity_for_node}")
 
     topologies = [
       libcluster_strategy: [
@@ -34,6 +41,10 @@ defmodule KV.Application do
 
     opts = [strategy: :one_for_one, name: KV.SuperSupervisor, max_seconds: 5, max_restarts: 3]
 
-    Supervisor.start_link(children, opts)
+    case Supervisor.start_link(children, opts) do
+      {:ok, pid} ->
+        Init.create_orchestrators()
+        {:ok, pid}
+    end
   end
 end
