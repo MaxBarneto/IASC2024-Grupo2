@@ -1,9 +1,6 @@
 defmodule DatoAgent do
   use Agent
   require Logger
-  
-  @registry DatoRegistry
-
 
   def start_link(initial_state, name, value) do
     {:ok, pid} = Agent.start_link(fn -> initial_state end, name: {:via, Registry, {DatoRegistry, name, value}})
@@ -61,14 +58,8 @@ defmodule DatoAgent do
 
   def update(map) do
     pid = DatoRegistry.find_all_pids |> List.first
-    Agent.update(pid, fn(state) -> map end)
+    Agent.update(pid, fn(_state) -> map end)
 
-  end
-
-  def data_size() do
-    pid = DatoRegistry.find_all_pids |> List.first
-    data = DatoAgent.getAll(pid)
-    map_size(data)
   end
 
   def get_data_from_replicas() do
