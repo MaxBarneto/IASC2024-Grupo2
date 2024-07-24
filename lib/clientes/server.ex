@@ -15,11 +15,12 @@ defmodule KVServer do
   end
 
   get "/datos/:key" do
-    IO.puts("Buscando dato para clave: #{key}")
+    IO.puts("Buscando valor de la clave: #{key}")
 
     case Orquestador.find(key) do
       [value] -> send_resp(conn, 200, value)
       [] -> send_resp(conn, 404, "Not Found")
+      :server_error -> send_resp(conn, 500, "Internal Server Error")
     end
   end
 

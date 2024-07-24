@@ -74,8 +74,10 @@ defmodule Orquestador do
   end
 
   def find(key) do
-    {orq_id, _, _} = OrquestadorHordeRegistry.get_any
-    GenServer.call(via_tuple(orq_id), {:find, key})
+    case OrquestadorHordeRegistry.get_any() do
+      {orq_id, _, _} -> GenServer.call(via_tuple(orq_id), {:find, key})
+      _ -> :server_error
+    end
   end
 
   # def insert(identifier, key, value) do
