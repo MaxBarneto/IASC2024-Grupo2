@@ -31,6 +31,8 @@ Init.load_data() # carga algunos datos a la base de datos
 ```
 
 ## Hacer peticiones a los servidores
+Cuando se levanta un nodo se visualiza el puerto del servidor
+
 ```bash
 # Obtener un dato de la clave :key
 curl -X GET localhost:<PORT>/datos/:key
