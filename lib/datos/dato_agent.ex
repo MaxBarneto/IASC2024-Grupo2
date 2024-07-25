@@ -8,10 +8,20 @@ defmodule DatoAgent do
   end
 
   def init(pid) do
-    replicated_data = DatoAgent.get_data_from_replicas()
-    if not is_nil(replicated_data) do
-      Agent.update(pid,fn (state) -> Map.merge(state,replicated_data) end) 
+    cond do
+      DatoRegistry.find_replicas |> Enum.count > 0 ->
+        replicated_data = get_data_from_agents()
+        if not is_nil(replicated_data) do
+          Agent.update(pid,fn (state) -> Map.merge(state,replicated_data) end) 
+        end
+      DatoRegistry.find_agents |> Enum.count > 0 ->
+        replicated_data = get_data_from_replicas()
+        if not is_nil(replicated_data) do
+          Agent.update(pid,fn (state) -> Map.merge(state,replicated_data) end) 
+        end
     end
+
+
     {:ok, pid}
   end
 
@@ -70,4 +80,16 @@ defmodule DatoAgent do
         Enum.filter(replica_data, fn map -> map_size(map) > 0 end) |> List.first()
       end
   end
+
+  def get_data_from_agents() do
+    if not Enum.empty?(DatoRegistry.find_replicas) do
+      value = DatoRegistry.find_replicas |> List.first |> elem(2)
+      agents = Enum.filter([Node.self()|Node.list()], 
+                  fn node -> String.split(to_string(node),["-","_","@"]) |> Enum.at(1) == value and 
+                  String.contains?(to_string(node),"agent") end)
+      agent_data = Enum.map(agents, fn node -> :erpc.call(node,DatoAgent,:getAll,[])  end)
+      Enum.filter(agent_data, fn map -> map_size(map) > 0 end) |> List.first()
+    end
+  end
+
 end

@@ -8,7 +8,6 @@ defmodule Datos.Supervisor do
       def init(_init_arg) do
         children = [
           DatoRegistry,
-          Datos.DynamicSupervisor,
           {DatoAgent,{Map.new,name(),value()}}
         ]
         opts = [strategy: :one_for_one]
