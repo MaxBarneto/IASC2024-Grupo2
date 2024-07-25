@@ -5,12 +5,10 @@ defmodule KV.Application do
     # Asegúrate de iniciar el generador de números aleatorios
     :rand.seed(:exsplus, :os.timestamp())
 
-    # Genera un número aleatorio entre 5000 y 6000
-    numero_aleatorio = 5000 + :rand.uniform(1001) - 1
-    numero_aleatorio_cluster = 5000 + :rand.uniform(1001) - 1
+    node_name = Node.self() |> Atom.to_string() |> String.split("@") |> List.first()
+    IO.puts("Inicializando nodo: #{node_name}")
 
-    IO.puts("Número aleatorio para Plug.Cowboy entre 5000 y 6000: #{numero_aleatorio}")
-    IO.puts("Número aleatorio para libcluster entre 5000 y 6000: #{numero_aleatorio_cluster}")
+    port_server = Application.get_env(:kv, String.to_atom(node_name), 5000 + :rand.uniform(1001) - 1)
 
     size_max_key = Application.fetch_env!(:kv, :size_max_key)
     size_max_value = Application.fetch_env!(:kv, :size_max_value)
@@ -18,6 +16,7 @@ defmodule KV.Application do
     IO.puts("Tamaño maximo para las claves: #{size_max_key}")
     IO.puts("Tamaño maximo para los valores: #{size_max_value}")
     IO.puts("Maxima capacidad de claves para los nodos: #{max_capacity_for_node}")
+    IO.puts("Puerto para el server del nodo #{node_name}: #{port_server}")
 
     topologies = [
       libcluster_strategy: [
@@ -31,7 +30,7 @@ defmodule KV.Application do
 
     children = [
       {Cluster.Supervisor, [topologies, [name: KV.ClusterSupervisor]]}, #libcluster
-      {Plug.Cowboy, scheme: :http, plug: KVServer, options: [port: numero_aleatorio]},
+      {Plug.Cowboy, scheme: :http, plug: KVServer, options: [port: port_server]},
       #Supervisores
       Datos.Supervisor,
       NodeManager.Supervisor,
