@@ -1,34 +1,52 @@
-# KV
+# TP 1C2024 Key-Value
 
-**TODO: Add description**
+# Arquitectura de la aplicacion
+![Arquitectura](./diagrama%20arquitectura.png)
 
-## Installation
-
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `kv` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:kv, "~> 0.1.0"}
-  ]
-end
+# Ejecucion de la base de datos
+## Iniciar nodos
+Levantar los nodos de datos y replicas con los scripts:
+```bash
+./start_agent1.bash
+./start_agent2.bash
+./start_replica1.bash
+./start_replica2.bash
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/kv>.
+**NOTA**: Si se quieren levantar mas nodos de datos y replicas tiene que seguir la convención:
+```elixir
+iex --name agent_[numero]@127.0.0.1 -S mix
+iex --name replica_[numero]@127.0.0.1 -S mix
+```
 
-# Startear agent
-{:ok, pid} = Datos.DynamicSupervisor.start_child(estado inicial,nombre,valor de asociacion con la replica) 
+## Levantar los orquestadores
+Dentro de cualquier nodo ejecutar:
+```elixir
+Init.create_orchestrators() # crea orquestadores master y slave
+```
 
-ejemplo: {:ok, pid} = Datos.DynamicSupervisor.start_child(Map.new,"agent1",1)
+## (Opcional) Cargar datos en los nodos
+```elixir
+Init.load_data() # carga algunos datos a la base de datos
+```
 
-# Obtener el pid del node manager
-pid = Process.whereis(NodeManager)
+## Hacer peticiones a los servidores
+```bash
+# Obtener un dato de la clave :key
+curl -X GET localhost:<PORT>/datos/:key
 
-# hacer calls al node manager
-GenServer.call(pid del nodemanager, {:comando, valores})
+# Insertar un dato
+curl -X POST localhost:<PORT>/datos --data '{"key":"x","value":"yyy"}'
 
-ejemplo:  GenServer.call(pid,{:insert,"a","a"})
+# Buscar los valores menores a X
+curl -X GET localhost:<PORT>/datos/filter/less?filter=X
 
+# Buscar los valores mayores a X
+curl -X GET localhost:<PORT>/datos/filter/greather?filter=X
+
+# Eliminar la clave :key
+curl -X DELETE localhost:<PORT>/datos/:key
+```
+
+## Configuración
+En el archivo de [config.exs](config/config.exs) se encuentra la configuracion de la aplicación. Por ejemplo la capacidad máxima por nodo de datos.
